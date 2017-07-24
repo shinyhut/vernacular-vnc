@@ -35,7 +35,7 @@ class VncAuthenticationHandlerTest extends Specification {
         handler.authenticate(session)
 
         then:
-        def output = ((ByteArrayOutputStream)session.outputStream).toByteArray() as List
+        def output = ((ByteArrayOutputStream) session.outputStream).toByteArray() as List
         output.size() == 17
         output[0] == 0x02 as byte
         output.subList(1, 17) == [

@@ -3,7 +3,6 @@ package com.shinyhut.vernacular.utils;
 public class ByteUtils {
 
     private ByteUtils() {
-
     }
 
     public static byte[] reverseBits(byte[] b) {

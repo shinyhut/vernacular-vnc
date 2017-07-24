@@ -12,7 +12,6 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-
 public class RRERenderer implements Renderer {
 
     private final PixelDecoder pixelDecoder;
@@ -50,13 +49,9 @@ public class RRERenderer implements Renderer {
                 graphic.setColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue()));
                 graphic.fillRect(x + rectangle.getX(), y + rectangle.getY(), width, height);
             }
-
-
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }
-
-
     }
 
 }

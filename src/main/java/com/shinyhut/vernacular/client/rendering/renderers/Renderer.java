@@ -7,6 +7,5 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 import java.awt.image.BufferedImage;
 
 public interface Renderer {
-
     void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) throws VncException;
 }

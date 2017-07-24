@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 
 import static java.lang.System.arraycopy;
 
-
 public class RawRenderer implements Renderer {
 
     private final PixelDecoder pixelDecoder;

@@ -16,9 +16,7 @@ import static com.shinyhut.vernacular.protocol.messages.SecurityType.VNC;
 public class SecurityTypeNegotiator {
 
     public SecurityHandler negotiate(VncSession session) throws IOException, VncException {
-
         ServerSecurityTypes serverSecurityTypes = ServerSecurityTypes.decode(session.getInputStream());
-
         SecurityHandler securityHandler;
 
         if (serverSecurityTypes.getSecurityTypes().contains(NONE)) {

@@ -6,14 +6,12 @@ import com.shinyhut.vernacular.client.VernacularConfig;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.awt.event.KeyEvent.*;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
 import static javax.swing.JOptionPane.*;
@@ -23,7 +21,6 @@ public class VernacularViewer extends JFrame {
     private VernacularConfig config;
     private VernacularClient client;
 
-    private Cursor originalCursor;
     private JMenuItem connectMenuItem;
     private JMenuItem disconnectMenuItem;
 
@@ -168,28 +165,15 @@ public class VernacularViewer extends JFrame {
 
     private void connect(String host, String port) {
         setMenuState(true);
+        lastFrame = null;
         client.start(host, parseInt(port));
-        hideLocalPointer();
     }
 
     private void disconnect() {
         if (running()) {
             client.stop();
         }
-        lastFrame = null;
         setMenuState(false);
-        restoreLocalPointer();
-    }
-
-    private void hideLocalPointer() {
-        originalCursor = getContentPane().getCursor();
-        BufferedImage cursorImg = new BufferedImage(16, 16, TYPE_INT_ARGB);
-        Cursor noCursor = getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "none");
-        getContentPane().setCursor(noCursor);
-    }
-
-    private void restoreLocalPointer() {
-        getContentPane().setCursor(originalCursor);
     }
 
     private void setMenuState(boolean running) {
@@ -214,14 +198,21 @@ public class VernacularViewer extends JFrame {
         getContentPane().getGraphics().drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
     }
 
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (lastFrame != null) {
+            renderFrame(lastFrame);
+        }
+    }
+
     private void resizeWindow(Image frame) {
         int remoteWidth = frame.getWidth(null);
         int remoteHeight = frame.getHeight(null);
         Dimension screenSize = getDefaultToolkit().getScreenSize();
-        int maxWidth = (int) (screenSize.getWidth() * 0.9);
-        int maxHeight = (int) (screenSize.getHeight() * 0.9);
+        int maxWidth = (int) screenSize.getWidth();
+        int maxHeight = (int) screenSize.getHeight();
         if (remoteWidth <= maxWidth && remoteHeight < maxHeight) {
-            setSize(remoteWidth, remoteHeight);
+            setWindowSize(remoteWidth, remoteHeight);
         } else {
             int scaledWidth;
             int scaledHeight;
@@ -232,9 +223,14 @@ public class VernacularViewer extends JFrame {
                 scaledHeight = maxHeight;
                 scaledWidth = (int) (remoteWidth * ((double) maxHeight / remoteHeight));
             }
-            setSize(scaledWidth, scaledHeight);
+            setWindowSize(scaledWidth, scaledHeight);
         }
         setLocation(0, 0);
+    }
+
+    private void setWindowSize(int width, int height) {
+        getContentPane().setPreferredSize(new Dimension(width, height));
+        pack();
     }
 
     private int scaleMouseX(int x) {

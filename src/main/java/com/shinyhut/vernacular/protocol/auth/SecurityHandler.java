@@ -6,6 +6,5 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import java.io.IOException;
 
 public interface SecurityHandler {
-
     void authenticate(VncSession session) throws VncException, IOException;
 }

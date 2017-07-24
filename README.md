@@ -1,6 +1,6 @@
 # Vernacular VNC
 
-Vernacular is a pure Java Virtual Network Computing (VNC) client library. The bundled 'Vernacular Viewer' demonstrates how to use in in a Swing based desktop application.
+Vernacular is a pure Java Virtual Network Computing (VNC) client library. The bundled 'Vernacular Viewer' demonstrates how to use it in a Swing based desktop application.
 
 Vernacular aims to implement the latest Remote Framebuffer Protocol Version 3.8, which is available here:
 

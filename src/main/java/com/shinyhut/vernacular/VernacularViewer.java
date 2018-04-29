@@ -5,6 +5,7 @@ import com.shinyhut.vernacular.client.VernacularConfig;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.util.Optional;
 
@@ -111,6 +112,8 @@ public class VernacularViewer extends JFrame {
                 Optional.ofNullable(showInputDialog(this, "Enter password")).orElse(""));
 
         config.setFramebufferUpdateListener(this::renderFrame);
+        config.setBellListener(v -> getDefaultToolkit().beep());
+        config.setServerCutTextListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         client = new VernacularClient(config);
     }
 

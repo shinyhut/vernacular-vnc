@@ -4,7 +4,9 @@ import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.UnknownMessageTypeException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.Framebuffer;
+import com.shinyhut.vernacular.protocol.messages.Bell;
 import com.shinyhut.vernacular.protocol.messages.FramebufferUpdate;
+import com.shinyhut.vernacular.protocol.messages.ServerCutText;
 
 import java.io.IOException;
 import java.io.PushbackInputStream;
@@ -37,19 +39,32 @@ public class ServerEventHandler {
 
                     switch (messageType) {
                         case 0x00:
-                            FramebufferUpdate message = FramebufferUpdate.decode(in, session.getPixelFormat().getBitsPerPixel());
-                            framebuffer.processUpdate(message);
+                            FramebufferUpdate framebufferUpdate = FramebufferUpdate.decode(in, session.getPixelFormat().getBitsPerPixel());
+                            framebuffer.processUpdate(framebufferUpdate);
+                            break;
+                        case 0x02:
+                            Bell.decode(in);
+                            Consumer<Void> bellListener = session.getConfig().getBellListener();
+                            if (bellListener != null) {
+                                bellListener.accept(null);
+                            }
+                            break;
+                        case 0x03:
+                            ServerCutText cutText = ServerCutText.decode(in);
+                            Consumer<String> cutTextListener = session.getConfig().getServerCutTextListener();
+                            if (cutTextListener != null) {
+                                cutTextListener.accept(cutText.getText());
+                            }
                             break;
                         default:
                             throw new UnknownMessageTypeException(messageType);
                     }
-
                 }
             } catch (IOException e) {
                 if (running) {
                     errorHandler.accept(new UnexpectedVncException(e));
                 }
-            } catch (VncException e ) {
+            } catch (VncException e) {
                 if (running) {
                     errorHandler.accept(e);
                 }

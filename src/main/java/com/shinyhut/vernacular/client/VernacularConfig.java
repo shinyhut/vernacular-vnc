@@ -14,6 +14,8 @@ public class VernacularConfig {
     private Supplier<String> passwordSupplier;
     private Consumer<VncException> errorListener;
     private Consumer<Image> framebufferUpdateListener;
+    private Consumer<Void> bellListener;
+    private Consumer<String> serverCutTextListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8;
@@ -58,6 +60,32 @@ public class VernacularConfig {
      */
     public void setFramebufferUpdateListener(Consumer<Image> framebufferUpdateListener) {
         this.framebufferUpdateListener = framebufferUpdateListener;
+    }
+
+    public Consumer<String> getServerCutTextListener() {
+        return serverCutTextListener;
+    }
+
+    /**
+     * Specifies a Consumer which will be invoked when the sever wants to store text in the clipboard
+     *
+     * @param serverCutTextListener  A Consumer which will be invoked when the sever wants to store text in the clipboard
+     */
+    public void setServerCutTextListener(Consumer<String> serverCutTextListener) {
+        this.serverCutTextListener = serverCutTextListener;
+    }
+
+    public Consumer<Void> getBellListener() {
+        return bellListener;
+    }
+
+    /**
+     * Specifies a Consumer which will be invoked when the server triggers an alert sound
+     *
+     * @param bellListener A Consumer which will be notified when the server triggers an alert sound
+     */
+    public void setBellListener(Consumer<Void> bellListener) {
+        this.bellListener = bellListener;
     }
 
     public boolean isShared() {

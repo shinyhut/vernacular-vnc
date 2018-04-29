@@ -47,8 +47,8 @@ https://tools.ietf.org/html/rfc6143
 |--------------------------|--------|
 | FramebufferUpdate        | Done   |
 | SetColorMapEntries       | TODO   |
-| Bell                     | TODO   |
-| ServerCutText            | TODO   |
+| Bell                     | Done   |
+| ServerCutText            | Done   |
 
 ### Encodings
 

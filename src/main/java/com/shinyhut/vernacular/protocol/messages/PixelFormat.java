@@ -97,7 +97,7 @@ public class PixelFormat implements Encodable {
         int redShift = dataInput.readUnsignedByte();
         int greenShift = dataInput.readUnsignedByte();
         int blueShift = dataInput.readUnsignedByte();
-        dataInput.read(new byte[3]);
+        dataInput.readFully(new byte[3]);
         return new PixelFormat(bpp, depth, bigEndian, trueColour, readMax, greenMax, blueMax, redShift, greenShift, blueShift);
     }
 }

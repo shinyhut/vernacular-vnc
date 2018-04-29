@@ -21,7 +21,7 @@ public class ErrorMessage {
         DataInputStream dataInput = new DataInputStream(input);
         int errorMessageLength = dataInput.readInt();
         byte[] errorMessageBytes = new byte[errorMessageLength];
-        dataInput.read(errorMessageBytes);
+        dataInput.readFully(errorMessageBytes);
         return new ErrorMessage(new String(errorMessageBytes, Charset.forName("US-ASCII")));
     }
 

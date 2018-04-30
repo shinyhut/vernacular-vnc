@@ -99,8 +99,8 @@ public class ClientEventHandler {
 
     private void requestFramebufferUpdate(boolean incremental) throws IOException {
         if (!incremental || session.getLastFramebufferUpdateTime().isPresent()) {
-            int width = session.getServerInit().getFrameBufferWidth();
-            int height = session.getServerInit().getFrameBufferHeight();
+            int width = session.getFramebufferWidth();
+            int height = session.getFramebufferHeight();
             FramebufferUpdateRequest updateRequest = new FramebufferUpdateRequest(incremental, 0, 0, width, height);
             sendMessage(updateRequest);
         }

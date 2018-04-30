@@ -11,11 +11,11 @@ class RectangleTest extends Specification {
         def pixels = new byte[16]
         new Random().nextBytes(pixels)
         def input = new ByteArrayInputStream(([
-            0x00, 0xA0, // x = 160
-            0x00, 0x64, // y = 100
-            0x00, 0x02, // width = 2
-            0x00, 0x02, // height = 2
-            0x00, 0x00, 0x00, 0x00 // raw encoding
+                0x00, 0xA0, // x = 160
+                0x00, 0x64, // y = 100
+                0x00, 0x02, // width = 2
+                0x00, 0x02, // height = 2
+                0x00, 0x00, 0x00, 0x00 // raw encoding
         ] + (pixels as List)) as byte[])
 
         when:
@@ -51,6 +51,30 @@ class RectangleTest extends Specification {
         result.width == 2
         result.height == 2
         result.pixelData == pixels
+    }
+
+    def "should decode a valid Rectangle in DESKTOPSIZE encoding"() {
+        given:
+        def bitsPerPixel = 32
+        def pixels = new byte[16]
+        new Random().nextBytes(pixels)
+        def input = new ByteArrayInputStream(([
+                0x00, 0x00, // x = 0
+                0x00, 0x00, // y = 0
+                0x00, 0x02, // width = 2
+                0x00, 0x02, // height = 2
+                0xFF, 0xFF, 0xFF, 0x21 // desktopsize encoding
+        ]) as byte[])
+
+        when:
+        def result = Rectangle.decode(input, bitsPerPixel)
+
+        then:
+        result.x == 0
+        result.y == 0
+        result.width == 2
+        result.height == 2
+        result.pixelData == [] as byte[]
     }
 
     def "should throw an exception if we try to decode a Rectangle with an unsupported pixel format"() {

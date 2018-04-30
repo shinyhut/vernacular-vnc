@@ -20,6 +20,9 @@ public class VncSession {
     private ServerInit serverInit;
     private PixelFormat pixelFormat;
 
+    private int framebufferWidth;
+    private int framebufferHeight;
+
     private LocalDateTime lastFramebufferUpdateTime;
 
     public VncSession(String host, int port, VernacularConfig config, InputStream inputStream, OutputStream outputStream) {
@@ -64,6 +67,22 @@ public class VncSession {
 
     public void setLastFramebufferUpdateTime(LocalDateTime lastFramebufferUpdateTime) {
         this.lastFramebufferUpdateTime = lastFramebufferUpdateTime;
+    }
+
+    public int getFramebufferWidth() {
+        return framebufferWidth;
+    }
+
+    public void setFramebufferWidth(int framebufferWidth) {
+        this.framebufferWidth = framebufferWidth;
+    }
+
+    public int getFramebufferHeight() {
+        return framebufferHeight;
+    }
+
+    public void setFramebufferHeight(int framebufferHeight) {
+        this.framebufferHeight = framebufferHeight;
     }
 
     public void kill() {

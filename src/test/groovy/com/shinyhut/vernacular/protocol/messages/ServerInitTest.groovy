@@ -20,8 +20,8 @@ class ServerInitTest extends Specification {
         def result = ServerInit.decode(input)
 
         then:
-        result.frameBufferWidth == 800
-        result.frameBufferHeight == 600
+        result.framebufferWidth == 800
+        result.framebufferHeight == 600
         result.pixelFormat
         result.name == 'test'
     }

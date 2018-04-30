@@ -194,7 +194,7 @@ public class VernacularViewer extends JFrame {
     }
 
     private void renderFrame(Image frame) {
-        if (lastFrame == null) {
+        if (resizeRequired(frame)) {
             resizeWindow(frame);
         }
         lastFrame = frame;
@@ -206,6 +206,10 @@ public class VernacularViewer extends JFrame {
         if (lastFrame != null) {
             renderFrame(lastFrame);
         }
+    }
+
+    private boolean resizeRequired(Image frame) {
+        return lastFrame == null || lastFrame.getWidth(null) != frame.getWidth(null) || lastFrame.getHeight(null) != frame.getHeight(null);
     }
 
     private void resizeWindow(Image frame) {

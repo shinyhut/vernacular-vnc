@@ -20,6 +20,8 @@ public class Initializer {
 
         ServerInit serverInit = ServerInit.decode(session.getInputStream());
         session.setServerInit(serverInit);
+        session.setFramebufferWidth(serverInit.getFramebufferWidth());
+        session.setFramebufferHeight(serverInit.getFramebufferHeight());
 
         VernacularConfig config = session.getConfig();
         ColorDepth colorDepth = config.getColorDepth();
@@ -37,7 +39,7 @@ public class Initializer {
                 colorDepth.getBlueShift());
 
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
-        SetEncodings setEncodings = new SetEncodings(RRE, COPYRECT, RAW);
+        SetEncodings setEncodings = new SetEncodings(RRE, COPYRECT, RAW, DESKTOP_SIZE);
 
         setPixelFormat.encode(out);
         setEncodings.encode(out);

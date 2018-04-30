@@ -68,5 +68,5 @@ Note: only True Colour rendering is supported with a configurable colour depth o
 | Encoding    | Status |
 |-------------|--------|
 | Cursor      | TODO   |
-| DesktopSize | TODO   |
+| DesktopSize | Done   |
 

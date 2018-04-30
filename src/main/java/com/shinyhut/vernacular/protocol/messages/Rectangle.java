@@ -62,6 +62,9 @@ public class Rectangle {
         int bytesPerPixel = bitsPerPixel / 8;
         byte[] pixelData;
         switch (encoding) {
+            case DESKTOP_SIZE:
+                pixelData = new byte[0];
+                break;
             case RRE:
                 int subRecCount = dataInput.readInt();
                 byte[] remaining = new byte[((bytesPerPixel + 8) * subRecCount) + bytesPerPixel];

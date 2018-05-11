@@ -4,11 +4,16 @@ import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.handshaking.Handshaker;
 import com.shinyhut.vernacular.protocol.initialization.Initializer;
+import com.shinyhut.vernacular.utils.KeySyms;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import static java.awt.event.KeyEvent.KEY_PRESSED;
+import static java.awt.event.KeyEvent.KEY_RELEASED;
 
 public class VernacularClient {
 
@@ -116,19 +121,28 @@ public class VernacularClient {
     }
 
     /**
-     * Updates the status (i.e. pressed or not pressed) of the specified key.
+     * Updates the status (i.e. pressed or not pressed) of the key represented by the specified KeyEvent
      *
-     * Note: to indicate typical key press followed by an immediate release, call this method twice in rapid
-     * succession, first with pressed = true, then with pressed = false
-     *
-     * @param keycode The keycode for the key being modified (@see java.awt.event.KeyEvent KeyEvent)
-     * @param symbol If the key is 'printable', specify the intended character representation. Otherwise set to 'null'
-     * @param pressed Is the key currently 'pressed'?
+     * @param event The KeyEvent for this key press or release (@see java.awt.event.KeyEvent KeyEvent)
      */
-    public void keyPress(int keycode, char symbol, boolean pressed) {
+    public void keyPress(KeyEvent event) {
+        if (event.getID() == KEY_PRESSED || event.getID() == KEY_RELEASED) {
+            KeySyms.forEvent(event).ifPresent(k -> keyPress(k, event.getID() == KEY_PRESSED));
+        }
+    }
+
+    /**
+     * Updates the status (i.e. pressed or not pressed) of the key represented by the specified KeySym
+     *
+     * For a complete list of KeySyms, see https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
+     *
+     * @param keySym The KeySym for this key press or release
+     * @param pressed Was the key pressed (true) or released (false)?
+     */
+    public void keyPress(int keySym, boolean pressed) {
         if (clientEventHandler != null) {
             try {
-                clientEventHandler.keyPress(keycode, symbol, pressed);
+                clientEventHandler.keyPress(keySym, pressed);
             } catch (IOException e) {
                 handleError(new UnexpectedVncException(e));
             }

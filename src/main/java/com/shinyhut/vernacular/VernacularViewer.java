@@ -57,14 +57,14 @@ public class VernacularViewer extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (running()) {
-                    client.keyPress(e.getKeyCode(), e.getKeyChar(), true);
+                    client.keyPress(e);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 if (running()) {
-                    client.keyPress(e.getKeyCode(), e.getKeyChar(), false);
+                    client.keyPress(e);
                 }
             }
         });

@@ -10,11 +10,9 @@ import com.shinyhut.vernacular.protocol.messages.PointerEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import static com.shinyhut.vernacular.utils.KeySyms.keySym;
 import static java.lang.Thread.sleep;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -77,12 +75,9 @@ public class ClientEventHandler {
         updateMouseStatus();
     }
 
-    void keyPress(int keycode, char symbol, boolean pressed) throws IOException {
-        Optional<Integer> keySym = keySym(keycode, symbol);
-        if (keySym.isPresent()) {
-            KeyEvent message = new KeyEvent(keySym.get(), pressed);
-            sendMessage(message);
-        }
+    void keyPress(int keySym, boolean pressed) throws IOException {
+        KeyEvent message = new KeyEvent(keySym, pressed);
+        sendMessage(message);
     }
 
     private void updateMouseStatus() throws IOException {

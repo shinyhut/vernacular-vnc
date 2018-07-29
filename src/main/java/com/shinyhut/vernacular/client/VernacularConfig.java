@@ -7,7 +7,8 @@ import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_TRUE;
 
 public class VernacularConfig {
 
@@ -18,7 +19,7 @@ public class VernacularConfig {
     private Consumer<String> serverCutTextListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
-    private ColorDepth colorDepth = BPP_8;
+    private ColorDepth colorDepth = BPP_8_INDEXED;
 
     public Supplier<String> getPasswordSupplier() {
         return passwordSupplier;

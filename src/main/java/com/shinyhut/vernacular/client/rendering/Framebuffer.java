@@ -6,12 +6,12 @@ import com.shinyhut.vernacular.client.rendering.renderers.CopyRectRenderer;
 import com.shinyhut.vernacular.client.rendering.renderers.RRERenderer;
 import com.shinyhut.vernacular.client.rendering.renderers.RawRenderer;
 import com.shinyhut.vernacular.client.rendering.renderers.Renderer;
-import com.shinyhut.vernacular.protocol.messages.Encoding;
-import com.shinyhut.vernacular.protocol.messages.FramebufferUpdate;
+import com.shinyhut.vernacular.protocol.messages.*;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -31,6 +31,7 @@ public class Framebuffer {
     }
 
     private final VncSession session;
+    private final Map<BigInteger, ColorMapEntry> colorMap = new ConcurrentHashMap<>();
 
     private BufferedImage frame;
 
@@ -46,7 +47,7 @@ public class Framebuffer {
             if (rectangle.getEncoding() == DESKTOP_SIZE) {
                 resizeFramebuffer(rectangle);
             } else {
-                RENDERERS.get(rectangle.getEncoding()).render(frame, rectangle, session.getPixelFormat());
+                RENDERERS.get(rectangle.getEncoding()).render(frame, rectangle, session.getPixelFormat(), colorMap);
             }
         }
         paint();
@@ -56,6 +57,12 @@ public class Framebuffer {
         Consumer<Image> listener = session.getConfig().getFramebufferUpdateListener();
         if (listener != null) {
             listener.accept(frame);
+        }
+    }
+
+    public void updateColorMap(SetColorMapEntries update) {
+        for (int i = 0; i < update.getColors().size(); i++) {
+            colorMap.put(BigInteger.valueOf(i + update.getFirstColor()), update.getColors().get(i));
         }
     }
 

@@ -9,7 +9,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.util.Optional;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16_TRUE;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.awt.event.KeyEvent.*;
@@ -103,7 +103,7 @@ public class VernacularViewer extends JFrame {
 
     private void initialiseVernacularClient() {
         config = new VernacularConfig();
-        config.setColorDepth(BPP_16);
+        config.setColorDepth(BPP_16_TRUE);
         config.setErrorListener(e -> {
             showMessageDialog(this, e.getMessage());
             setMenuState(false);

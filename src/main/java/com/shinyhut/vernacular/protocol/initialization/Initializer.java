@@ -30,7 +30,7 @@ public class Initializer {
                 colorDepth.getBitsPerPixel(),
                 colorDepth.getDepth(),
                 true,
-                true,
+                colorDepth.isTrueColor(),
                 colorDepth.getRedMax(),
                 colorDepth.getGreenMax(),
                 colorDepth.getBlueMax(),

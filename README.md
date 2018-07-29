@@ -46,7 +46,7 @@ https://tools.ietf.org/html/rfc6143
 | Message                  | Status |
 |--------------------------|--------|
 | FramebufferUpdate        | Done   |
-| SetColorMapEntries       | TODO   |
+| SetColorMapEntries       | Done   |
 | Bell                     | Done   |
 | ServerCutText            | Done   |
 
@@ -60,8 +60,6 @@ https://tools.ietf.org/html/rfc6143
 | Hextile  | TODO   |
 | TRLE     | TODO   |
 | ZRLE     | TODO   |
-
-Note: only True Colour rendering is supported with a configurable colour depth of 8, 16 or 24 bits per pixel.
 
 ### Pseudo-Encodings
 

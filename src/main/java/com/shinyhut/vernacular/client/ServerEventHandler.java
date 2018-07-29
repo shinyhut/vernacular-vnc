@@ -7,6 +7,7 @@ import com.shinyhut.vernacular.client.rendering.Framebuffer;
 import com.shinyhut.vernacular.protocol.messages.Bell;
 import com.shinyhut.vernacular.protocol.messages.FramebufferUpdate;
 import com.shinyhut.vernacular.protocol.messages.ServerCutText;
+import com.shinyhut.vernacular.protocol.messages.SetColorMapEntries;
 
 import java.io.IOException;
 import java.io.PushbackInputStream;
@@ -41,6 +42,10 @@ public class ServerEventHandler {
                         case 0x00:
                             FramebufferUpdate framebufferUpdate = FramebufferUpdate.decode(in, session.getPixelFormat().getBitsPerPixel());
                             framebuffer.processUpdate(framebufferUpdate);
+                            break;
+                        case 0x01:
+                            SetColorMapEntries setColorMapEntries = SetColorMapEntries.decode(in);
+                            framebuffer.updateColorMap(setColorMapEntries);
                             break;
                         case 0x02:
                             Bell.decode(in);

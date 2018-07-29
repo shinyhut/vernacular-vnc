@@ -2,17 +2,21 @@ package com.shinyhut.vernacular.client.rendering;
 
 public enum ColorDepth {
 
-    /** 8 bits per pixel **/
-    BPP_8(8, 8, 7, 7, 3, 5, 2, 0),
+    /** 8 bits per pixel indexed color **/
+    BPP_8_INDEXED(8, 8, false, 0, 0, 0, 0, 0, 0),
 
-    /** 16 bits per pixel **/
-    BPP_16(16, 16, 31, 63, 31, 11, 5, 0),
+    /** 8 bits per pixel true color **/
+    BPP_8_TRUE(8, 8, true, 7, 7, 3, 5, 2, 0),
 
-    /** 24 bits per pixel **/
-    BPP_24(32, 24, 255, 255, 255, 16, 8, 0);
+    /** 16 bits per pixel true color **/
+    BPP_16_TRUE(16, 16, true, 31, 63, 31, 11, 5, 0),
+
+    /** 24 bits per pixel true color **/
+    BPP_24_TRUE(32, 24, true, 255, 255, 255, 16, 8, 0);
 
     private final int bitsPerPixel;
     private final int depth;
+    private final boolean trueColor;
     private final int redMax;
     private final int blueMax;
     private final int greenMax;
@@ -20,9 +24,10 @@ public enum ColorDepth {
     private final int blueShift;
     private final int greenShift;
 
-    ColorDepth(int bitsPerPixel, int depth, int redMax, int blueMax, int greenMax, int redShift, int blueShift, int greenShift) {
+    ColorDepth(int bitsPerPixel, int depth, boolean trueColor, int redMax, int blueMax, int greenMax, int redShift, int blueShift, int greenShift) {
         this.bitsPerPixel = bitsPerPixel;
         this.depth = depth;
+        this.trueColor = trueColor;
         this.redMax = redMax;
         this.blueMax = blueMax;
         this.greenMax = greenMax;
@@ -37,6 +42,10 @@ public enum ColorDepth {
 
     public int getDepth() {
         return depth;
+    }
+
+    public boolean isTrueColor() {
+        return trueColor;
     }
 
     public int getRedMax() {

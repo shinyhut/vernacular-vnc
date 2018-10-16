@@ -4,12 +4,13 @@ import com.shinyhut.vernacular.client.VernacularClient;
 import com.shinyhut.vernacular.client.VernacularConfig;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.util.Optional;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16_TRUE;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.awt.event.KeyEvent.*;
@@ -19,13 +20,14 @@ import static javax.swing.JOptionPane.*;
 
 public class VernacularViewer extends JFrame {
 
-    private VernacularConfig config;
     private VernacularClient client;
 
     private JMenuItem connectMenuItem;
     private JMenuItem disconnectMenuItem;
 
     private Image lastFrame;
+
+    private boolean menuActive = false;
 
     private VernacularViewer() {
         initUI();
@@ -102,15 +104,13 @@ public class VernacularViewer extends JFrame {
     }
 
     private void initialiseVernacularClient() {
-        config = new VernacularConfig();
-        config.setColorDepth(BPP_16_TRUE);
+        VernacularConfig config = new VernacularConfig();
+        config.setColorDepth(BPP_8_INDEXED);
         config.setErrorListener(e -> {
             showMessageDialog(this, e.getMessage());
             setMenuState(false);
         });
-        config.setPasswordSupplier(() ->
-                Optional.ofNullable(showInputDialog(this, "Enter password")).orElse(""));
-
+        config.setPasswordSupplier(this::showPasswordDialog);
         config.setFramebufferUpdateListener(this::renderFrame);
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setServerCutTextListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
@@ -146,9 +146,31 @@ public class VernacularViewer extends JFrame {
         file.add(exit);
         menu.add(file);
         setJMenuBar(menu);
+
+        MenuListener menuListener = new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                menuActive = true;
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                menuActive = false;
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                menuActive = false;
+            }
+        };
+
+        for (int m = 0; m < menu.getMenuCount(); m++) {
+            menu.getMenu(m).addMenuListener(menuListener);
+        }
     }
 
     private void showConnectDialog() {
+        repaint();
         JPanel connectDialog = new JPanel();
         JTextField hostField = new JTextField(20);
         JTextField portField = new JTextField("5900");
@@ -160,10 +182,22 @@ public class VernacularViewer extends JFrame {
         connectDialog.add(hostField);
         connectDialog.add(portLabel);
         connectDialog.add(portField);
-        int choice = showConfirmDialog(VernacularViewer.this, connectDialog, "Connect", OK_CANCEL_OPTION);
+        int choice = showConfirmDialog(this, connectDialog, "Connect", OK_CANCEL_OPTION);
         if (choice == OK_OPTION) {
             connect(hostField.getText(), portField.getText());
         }
+    }
+
+    private String showPasswordDialog() {
+        String password = "";
+        JPanel passwordDialog = new JPanel();
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordDialog.add(passwordField);
+        int choice = showConfirmDialog(this, passwordDialog, "Enter Password", OK_CANCEL_OPTION);
+        if (choice == OK_OPTION) {
+            password = new String(passwordField.getPassword());
+        }
+        return password;
     }
 
     private void connect(String host, String port) {
@@ -177,6 +211,7 @@ public class VernacularViewer extends JFrame {
             client.stop();
         }
         setMenuState(false);
+        repaint();
     }
 
     private void setMenuState(boolean running) {
@@ -198,9 +233,12 @@ public class VernacularViewer extends JFrame {
             resizeWindow(frame);
         }
         lastFrame = frame;
-        getContentPane().getGraphics().drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
+        if (!menuActive) {
+            getContentPane().getGraphics().drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
+        }
     }
 
+    @Override
     public void paint(Graphics g) {
         super.paint(g);
         if (lastFrame != null) {

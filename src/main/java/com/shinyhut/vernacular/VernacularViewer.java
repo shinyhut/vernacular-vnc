@@ -10,7 +10,8 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.*;
+import static java.awt.BorderLayout.CENTER;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.awt.event.KeyEvent.*;
@@ -20,14 +21,16 @@ import static javax.swing.JOptionPane.*;
 
 public class VernacularViewer extends JFrame {
 
+    private VernacularConfig config;
     private VernacularClient client;
 
     private JMenuItem connectMenuItem;
     private JMenuItem disconnectMenuItem;
 
-    private Image lastFrame;
+    private JMenuItem bpp8IndexedColorMenuItem;
+    private JMenuItem bpp16TrueColorMenuItem;
 
-    private boolean menuActive = false;
+    private Image lastFrame;
 
     private VernacularViewer() {
         initUI();
@@ -51,6 +54,7 @@ public class VernacularViewer extends JFrame {
         addMenu();
         addMouseListeners();
         addKeyListener();
+        addDrawingSurface();
         initialiseVernacularClient();
     }
 
@@ -103,8 +107,20 @@ public class VernacularViewer extends JFrame {
         });
     }
 
+    private void addDrawingSurface() {
+        add(new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (lastFrame != null) {
+                    g.drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
+                }
+            }
+        }, CENTER);
+    }
+
     private void initialiseVernacularClient() {
-        VernacularConfig config = new VernacularConfig();
+        config = new VernacularConfig();
         config.setColorDepth(BPP_8_INDEXED);
         config.setErrorListener(e -> {
             showMessageDialog(this, e.getMessage());
@@ -123,6 +139,9 @@ public class VernacularViewer extends JFrame {
         JMenu file = new JMenu("File");
         file.setMnemonic(VK_F);
 
+        JMenu options = new JMenu("Options");
+        file.setMnemonic(VK_O);
+
         connectMenuItem = new JMenuItem("Connect");
         connectMenuItem.setMnemonic(VK_C);
         connectMenuItem.addActionListener((ActionEvent event) -> showConnectDialog());
@@ -131,6 +150,16 @@ public class VernacularViewer extends JFrame {
         disconnectMenuItem.setMnemonic(VK_D);
         disconnectMenuItem.setEnabled(false);
         disconnectMenuItem.addActionListener((ActionEvent event) -> disconnect());
+
+        ButtonGroup colorDepths = new ButtonGroup();
+
+        bpp8IndexedColorMenuItem = new JRadioButtonMenuItem("8-bit Indexed Color", true);
+        bpp16TrueColorMenuItem = new JRadioButtonMenuItem("16-bit True Color");
+        colorDepths.add(bpp8IndexedColorMenuItem);
+        colorDepths.add(bpp16TrueColorMenuItem);
+
+        bpp8IndexedColorMenuItem.addActionListener((ActionEvent event) -> config.setColorDepth(BPP_8_INDEXED));
+        bpp16TrueColorMenuItem.addActionListener((ActionEvent event) -> config.setColorDepth(BPP_16_TRUE));
 
         JMenuItem exit = new JMenuItem("Exit");
         exit.setMnemonic(VK_E);
@@ -144,29 +173,11 @@ public class VernacularViewer extends JFrame {
         file.add(connectMenuItem);
         file.add(disconnectMenuItem);
         file.add(exit);
+        options.add(bpp8IndexedColorMenuItem);
+        options.add(bpp16TrueColorMenuItem);
         menu.add(file);
+        menu.add(options);
         setJMenuBar(menu);
-
-        MenuListener menuListener = new MenuListener() {
-            @Override
-            public void menuSelected(MenuEvent e) {
-                menuActive = true;
-            }
-
-            @Override
-            public void menuDeselected(MenuEvent e) {
-                menuActive = false;
-            }
-
-            @Override
-            public void menuCanceled(MenuEvent e) {
-                menuActive = false;
-            }
-        };
-
-        for (int m = 0; m < menu.getMenuCount(); m++) {
-            menu.getMenu(m).addMenuListener(menuListener);
-        }
     }
 
     private void showConnectDialog() {
@@ -218,9 +229,13 @@ public class VernacularViewer extends JFrame {
         if (running) {
             connectMenuItem.setEnabled(false);
             disconnectMenuItem.setEnabled(true);
+            bpp8IndexedColorMenuItem.setEnabled(false);
+            bpp16TrueColorMenuItem.setEnabled(false);
         } else {
             connectMenuItem.setEnabled(true);
             disconnectMenuItem.setEnabled(false);
+            bpp8IndexedColorMenuItem.setEnabled(true);
+            bpp16TrueColorMenuItem.setEnabled(true);
         }
     }
 
@@ -233,17 +248,7 @@ public class VernacularViewer extends JFrame {
             resizeWindow(frame);
         }
         lastFrame = frame;
-        if (!menuActive) {
-            getContentPane().getGraphics().drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
-        }
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        if (lastFrame != null) {
-            renderFrame(lastFrame);
-        }
+        repaint();
     }
 
     private boolean resizeRequired(Image frame) {

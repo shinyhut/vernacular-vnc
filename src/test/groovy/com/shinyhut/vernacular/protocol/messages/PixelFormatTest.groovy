@@ -10,7 +10,7 @@ class PixelFormatTest extends Specification {
             0x20, // 32 bits per pixel
             0x18, // 24 bit depth
             0x00, // big endian = false
-            0x01, // true colour = true
+            0x01, // true color = true
             0x01, 0x00, // red max 256
             0x01, 0x00, // green max 256
             0x01, 0x00, // blue max 256
@@ -31,7 +31,7 @@ class PixelFormatTest extends Specification {
         result.bitsPerPixel == 32
         result.depth == 24
         !result.bigEndian
-        result.trueColour
+        result.trueColor
         result.redMax == 256
         result.greenMax == 256
         result.blueMax == 256

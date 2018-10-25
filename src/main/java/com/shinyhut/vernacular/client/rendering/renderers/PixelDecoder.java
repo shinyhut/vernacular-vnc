@@ -18,7 +18,7 @@ public class PixelDecoder {
         int green;
         int blue;
 
-        if (pixelFormat.isTrueColour()) {
+        if (pixelFormat.isTrueColor()) {
             red = value.shiftRight(pixelFormat.getRedShift()).intValue() & pixelFormat.getRedMax();
             green = value.shiftRight(pixelFormat.getGreenShift()).intValue() & pixelFormat.getGreenMax();
             blue = value.shiftRight(pixelFormat.getBlueShift()).intValue() & pixelFormat.getBlueMax();

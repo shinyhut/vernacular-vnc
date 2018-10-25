@@ -10,7 +10,7 @@ class PixelDecoderTest extends Specification {
     @Subject
     def decoder = new PixelDecoder()
 
-    def "should decode a valid true color Pixel in the specified format into RGB colour values"() {
+    def "should decode a valid true color Pixel in the specified format into RGB color values"() {
         given:
         def pixelFormat = new PixelFormat(16, 16, true, true, 31, 63, 31, 11, 5, 0)
         def pixel = [0xff, 0xff] as byte[]
@@ -24,7 +24,7 @@ class PixelDecoderTest extends Specification {
         result.blue == 255
     }
 
-    def "should decode a valid indexed color Pixel in the specified format into RGB colour values"() {
+    def "should decode a valid indexed color Pixel in the specified format into RGB color values"() {
         given:
         def pixelFormat = new PixelFormat(8, 8, true, false, 0, 0, 0, 0, 0, 0)
         def pixel = [1] as byte[]

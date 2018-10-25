@@ -34,13 +34,13 @@ public class RRERenderer implements Renderer {
 
         try {
             int numberOfSubrectangles = dataInput.readInt();
-            byte[] bgColourBytes = new byte[bytesPerPixel];
-            dataInput.readFully(bgColourBytes);
-            Pixel bgColour = pixelDecoder.decode(bgColourBytes, pixelFormat, colorMap);
+            byte[] bgColorBytes = new byte[bytesPerPixel];
+            dataInput.readFully(bgColorBytes);
+            Pixel bgColor = pixelDecoder.decode(bgColorBytes, pixelFormat, colorMap);
 
             Graphics2D graphic = (Graphics2D) destination.getGraphics();
 
-            graphic.setColor(new Color(bgColour.getRed(), bgColour.getGreen(), bgColour.getBlue()));
+            graphic.setColor(new Color(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()));
             graphic.fillRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
 
             for (int i = 0; i < numberOfSubrectangles; i++) {
@@ -50,8 +50,8 @@ public class RRERenderer implements Renderer {
                 int y = dataInput.readUnsignedShort();
                 int width = dataInput.readUnsignedShort();
                 int height = dataInput.readUnsignedShort();
-                Pixel colour = pixelDecoder.decode(bytes, pixelFormat, colorMap);
-                graphic.setColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue()));
+                Pixel color = pixelDecoder.decode(bytes, pixelFormat, colorMap);
+                graphic.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
                 graphic.fillRect(x + rectangle.getX(), y + rectangle.getY(), width, height);
             }
         } catch (IOException e) {

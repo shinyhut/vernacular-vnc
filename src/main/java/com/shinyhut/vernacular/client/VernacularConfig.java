@@ -126,14 +126,14 @@ public class VernacularConfig {
     }
 
     /**
-     * Specifies the colour depth to request from the remote server. Note that the greater the colour depth, the more
+     * Specifies the color depth to request from the remote server. Note that the greater the color depth, the more
      * bandwidth we will consume.
      *
      * Default: 8 bits per pixel
      *
      * @see com.shinyhut.vernacular.client.rendering.ColorDepth ColorDepth
      *
-     * @param colorDepth The colour depth for rendering the remote desktop
+     * @param colorDepth The color depth for rendering the remote desktop
      */
     public void setColorDepth(ColorDepth colorDepth) {
         this.colorDepth = colorDepth;

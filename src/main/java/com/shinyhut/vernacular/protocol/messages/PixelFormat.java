@@ -7,7 +7,7 @@ public class PixelFormat implements Encodable {
     private final int bitsPerPixel;
     private final int depth;
     private final boolean bigEndian;
-    private final boolean trueColour;
+    private final boolean trueColor;
     private final int redMax;
     private final int greenMax;
     private final int blueMax;
@@ -15,12 +15,12 @@ public class PixelFormat implements Encodable {
     private final int greenShift;
     private final int blueShift;
 
-    public PixelFormat(int bitsPerPixel, int depth, boolean bigEndian, boolean trueColour, int redMax,
+    public PixelFormat(int bitsPerPixel, int depth, boolean bigEndian, boolean trueColor, int redMax,
                        int greenMax, int blueMax, int redShift, int greenShift, int blueShift) {
         this.bitsPerPixel = bitsPerPixel;
         this.depth = depth;
         this.bigEndian = bigEndian;
-        this.trueColour = trueColour;
+        this.trueColor = trueColor;
         this.redMax = redMax;
         this.greenMax = greenMax;
         this.blueMax = blueMax;
@@ -41,8 +41,8 @@ public class PixelFormat implements Encodable {
         return bigEndian;
     }
 
-    public boolean isTrueColour() {
-        return trueColour;
+    public boolean isTrueColor() {
+        return trueColor;
     }
 
     public int getRedMax() {
@@ -75,7 +75,7 @@ public class PixelFormat implements Encodable {
         dataOutput.writeByte(bitsPerPixel);
         dataOutput.writeByte(depth);
         dataOutput.writeBoolean(bigEndian);
-        dataOutput.writeBoolean(trueColour);
+        dataOutput.writeBoolean(trueColor);
         dataOutput.writeShort(redMax);
         dataOutput.writeShort(greenMax);
         dataOutput.writeShort(blueMax);
@@ -90,7 +90,7 @@ public class PixelFormat implements Encodable {
         int bpp = dataInput.readUnsignedByte();
         int depth = dataInput.readUnsignedByte();
         boolean bigEndian = dataInput.readBoolean();
-        boolean trueColour = dataInput.readBoolean();
+        boolean trueColor = dataInput.readBoolean();
         int readMax = dataInput.readUnsignedShort();
         int greenMax = dataInput.readUnsignedShort();
         int blueMax = dataInput.readUnsignedShort();
@@ -98,6 +98,6 @@ public class PixelFormat implements Encodable {
         int greenShift = dataInput.readUnsignedByte();
         int blueShift = dataInput.readUnsignedByte();
         dataInput.readFully(new byte[3]);
-        return new PixelFormat(bpp, depth, bigEndian, trueColour, readMax, greenMax, blueMax, redShift, greenShift, blueShift);
+        return new PixelFormat(bpp, depth, bigEndian, trueColor, readMax, greenMax, blueMax, redShift, greenShift, blueShift);
     }
 }

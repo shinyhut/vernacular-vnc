@@ -19,7 +19,7 @@ class SetPixelFormatTest extends Specification {
                 0x20, // 32 bits per pixel
                 0x18, // 24 bit depth
                 0x00, // big endian = false
-                0x01, // true colour = true
+                0x01, // true color = true
                 0x01, 0x00, // red max 256
                 0x01, 0x00, // green max 256
                 0x01, 0x00, // blue max 256

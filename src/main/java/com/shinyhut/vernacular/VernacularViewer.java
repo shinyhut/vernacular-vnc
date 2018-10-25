@@ -139,7 +139,7 @@ public class VernacularViewer extends JFrame {
         file.setMnemonic(VK_F);
 
         JMenu options = new JMenu("Options");
-        file.setMnemonic(VK_O);
+        options.setMnemonic(VK_O);
 
         connectMenuItem = new JMenuItem("Connect");
         connectMenuItem.setMnemonic(VK_C);
@@ -161,7 +161,7 @@ public class VernacularViewer extends JFrame {
         bpp16TrueColorMenuItem.addActionListener((ActionEvent event) -> config.setColorDepth(BPP_16_TRUE));
 
         JMenuItem exit = new JMenuItem("Exit");
-        exit.setMnemonic(VK_E);
+        exit.setMnemonic(VK_X);
         exit.addActionListener((ActionEvent event) -> {
             if (client != null) {
                 client.stop();

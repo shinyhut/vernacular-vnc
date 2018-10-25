@@ -4,13 +4,12 @@ import com.shinyhut.vernacular.client.VernacularClient;
 import com.shinyhut.vernacular.client.VernacularConfig;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.*;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16_TRUE;
+import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.Toolkit.getDefaultToolkit;
@@ -123,7 +122,7 @@ public class VernacularViewer extends JFrame {
         config = new VernacularConfig();
         config.setColorDepth(BPP_8_INDEXED);
         config.setErrorListener(e -> {
-            showMessageDialog(this, e.getMessage());
+            showMessageDialog(this, e.getMessage(), "Error", ERROR_MESSAGE);
             setMenuState(false);
         });
         config.setPasswordSupplier(this::showPasswordDialog);
@@ -181,7 +180,6 @@ public class VernacularViewer extends JFrame {
     }
 
     private void showConnectDialog() {
-        repaint();
         JPanel connectDialog = new JPanel();
         JTextField hostField = new JTextField(20);
         JTextField portField = new JTextField("5900");
@@ -195,7 +193,19 @@ public class VernacularViewer extends JFrame {
         connectDialog.add(portField);
         int choice = showConfirmDialog(this, connectDialog, "Connect", OK_CANCEL_OPTION);
         if (choice == OK_OPTION) {
-            connect(hostField.getText(), portField.getText());
+            String host = hostField.getText();
+            if (host == null || host.isEmpty()) {
+                showMessageDialog(this, "Please enter a valid host", null, WARNING_MESSAGE);
+                return;
+            }
+            int port;
+            try {
+                port = parseInt(portField.getText());
+            } catch (NumberFormatException e) {
+                showMessageDialog(this, "Please enter a valid port", null, WARNING_MESSAGE);
+                return;
+            }
+            connect(host, port);
         }
     }
 
@@ -211,10 +221,10 @@ public class VernacularViewer extends JFrame {
         return password;
     }
 
-    private void connect(String host, String port) {
+    private void connect(String host, int port) {
         setMenuState(true);
         lastFrame = null;
-        client.start(host, parseInt(port));
+        client.start(host, port);
     }
 
     private void disconnect() {
@@ -222,7 +232,6 @@ public class VernacularViewer extends JFrame {
             client.stop();
         }
         setMenuState(false);
-        repaint();
     }
 
     private void setMenuState(boolean running) {

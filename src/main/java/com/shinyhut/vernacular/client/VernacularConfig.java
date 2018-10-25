@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_TRUE;
 
 public class VernacularConfig {
 

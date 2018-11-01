@@ -1,70 +1,85 @@
 # Vernacular VNC
 
-Vernacular is a pure Java Virtual Network Computing (VNC) client library. The bundled 'Vernacular Viewer' demonstrates how to use it in a Swing based desktop application.
+Vernacular is a pure Java Virtual Network Computing (VNC) remote desktop client library.
 
 Vernacular aims to implement the latest Remote Framebuffer Protocol Version 3.8, which is available here:
 
 https://tools.ietf.org/html/rfc6143
 
-## Current Status
+## Usage
 
-### Handshake Messages
+```
+ import com.shinyhut.vernacular.client.VernacularClient;
+ import com.shinyhut.vernacular.client.VernacularConfig;
+ import com.shinyhut.vernacular.client.rendering.ColorDepth;
+ 
+ public class VernacularDemo {
+ 
+     public static void main(String[] args) throws Exception {
+ 
+         VernacularConfig config = new VernacularConfig();
+         VernacularClient client = new VernacularClient(config);
+ 
+         // Select 8-bits per pixel indexed color, or 8/16/24 bits per pixel true color
+         config.setColorDepth(ColorDepth.BPP_8_INDEXED);
+ 
+         // Set up callbacks for the various events that can happen in a VNC session
+ 
+         // Exception handler
+         config.setErrorListener(ex -> ex.printStackTrace());
+ 
+         // Password supplier - this is only invoked if the remote server requires authentication
+         config.setPasswordSupplier(() -> "my secret password");
+ 
+         // Handle system bell events from the remote host
+         config.setBellListener(v -> System.out.println("DING!"));
+ 
+         // Receive content copied to the remote clipboard
+         config.setServerCutTextListener(text -> System.out.println("Received copied text: " + text));
+ 
+         // Receive screen updates from the remote host
+         // The 'image' parameter is a java.awt.Image containing a current snapshot of the remote desktop
+         // Expect this event to be triggered several times per second
+         config.setFramebufferUpdateListener(image -> {
+             int width = image.getWidth(null);
+             int height = image.getHeight(null);
+             System.out.println(String.format("Received a %dx%d screen update", width, height));
+         });
+ 
+         // Start the VNC session
+         String host = "myvncserver";
+         int port = 5900;
+         client.start(host, port);
+ 
+         // Move the mouse. Screen co-ordinates are relative to the top-left. 
+         client.moveMouse(400, 300);
+ 
+         // Click a mouse button. Buttons are numbered 1 - 3
+         // 'Clicking' means sending a button pressed event followed by a button released event.
+         client.updateMouseButton(1, true);
+         client.updateMouseButton(1, false);
+ 
+         // Type some text. 'Typing' a character means sending a key pressed event followed by a key released event.
+         // Keys are identified by X11 KeySyms, see https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
+         // For standard ASCII characters, KeySyms are generally the same as their ASCII code
+         client.keyPress('t', true);
+         client.keyPress('t', false);
+         client.keyPress('e', true);
+         client.keyPress('e', false);
+         client.keyPress('s', true);
+         client.keyPress('s', false);
+         client.keyPress('t', true);
+         client.keyPress('t', false);
+ 
+         // Let the VNC session continue as long as required
+         Thread.sleep(10000);
+ 
+         // Terminate the VNC session and cleanup
+         client.stop();
+     }
+ }
+```
 
-| Message         | Status |
-|-----------------|--------|
-| ProtocolVersion | Done   |
-| Security        | Done   |
-| SecurityResult  | Done   |
+For a more realistic example, see 'Vernacular Viewer' in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application: 
 
-### Security Types
-
-| Type | Status |
-|------|--------|
-| NONE | Done   |
-| VNC  | Done   |
-
-### Initialization Messages
-
-| Message    | Status |
-|------------|--------|
-| ClientInit | Done   |
-| ServerInit | Done   |
-
-### Client-to-Server Messages
-
-| Message                  | Status |
-|--------------------------|--------|
-| SetPixelFormat           | Done   |
-| SetEncodings             | Done   |
-| FramebufferUpdateRequest | Done   |
-| KeyEvent                 | Done   |
-| PointerEvent             | Done   |
-| ClientCutText            | TODO   |
-
-### Server-to-Client Messages
-
-| Message                  | Status |
-|--------------------------|--------|
-| FramebufferUpdate        | Done   |
-| SetColorMapEntries       | Done   |
-| Bell                     | Done   |
-| ServerCutText            | Done   |
-
-### Encodings
-
-| Encoding | Status |
-|----------|--------|
-| Raw      | Done   |
-| CopyRect | Done   |
-| RRE      | Done   |
-| Hextile  | TODO   |
-| TRLE     | TODO   |
-| ZRLE     | TODO   |
-
-### Pseudo-Encodings
-
-| Encoding    | Status |
-|-------------|--------|
-| Cursor      | TODO   |
-| DesktopSize | Done   |
-
+https://github.com/shinyhut/vernacular-vnc/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java

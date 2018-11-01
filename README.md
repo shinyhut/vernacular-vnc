@@ -2,13 +2,13 @@
 
 Vernacular is a pure Java Virtual Network Computing (VNC) remote desktop client library.
 
-Vernacular aims to implement the latest Remote Framebuffer Protocol Version 3.8, which is available here:
-
-https://tools.ietf.org/html/rfc6143
+Vernacular is open-source software and released under the MIT license.
 
 ## Usage
 
 ```
+ package vernaculardemo;
+
  import com.shinyhut.vernacular.client.VernacularClient;
  import com.shinyhut.vernacular.client.VernacularConfig;
  import com.shinyhut.vernacular.client.rendering.ColorDepth;
@@ -51,7 +51,7 @@ https://tools.ietf.org/html/rfc6143
          int port = 5900;
          client.start(host, port);
  
-         // Move the mouse. Screen co-ordinates are relative to the top-left. 
+         // Move the mouse. Screen coordinates are relative to the top-left. 
          client.moveMouse(400, 300);
  
          // Click a mouse button. Buttons are numbered 1 - 3

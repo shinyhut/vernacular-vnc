@@ -1,10 +1,13 @@
 # Vernacular VNC
+[![Latest release](https://img.shields.io/github/release/shinyhut/vernacular-vnc.svg)](https://github.com/shinyhut/vernacular-vnc/releases/latest)
 
-Vernacular is a pure Java Virtual Network Computing (VNC) remote desktop client library.
-
-Vernacular is open-source software and released under the MIT license.
+Vernacular is a pure Java Virtual Network Computing (VNC) remote desktop client library. Vernacular is open-source and
+released under the MIT license. 
 
 ## Usage
+
+The Vernacular .jar file is executable, and it can be used as a simple but functional VNC client. However, Vernacular
+is primarily intended to be used as a library in third-party applications: 
 
 ```
  package vernaculardemo;
@@ -80,6 +83,4 @@ Vernacular is open-source software and released under the MIT license.
  }
 ```
 
-For a more realistic example, see 'Vernacular Viewer' in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application: 
-
-https://github.com/shinyhut/vernacular-vnc/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java
+For a more realistic example, see [Vernacular Viewer](https://github.com/shinyhut/vernacular-vnc/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.

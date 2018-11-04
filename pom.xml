@@ -64,5 +64,11 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>bintray-shinyhut-oss-vernacular</id>
+            <url>https://api.bintray.com/maven/shinyhut/oss/vernacular/;publish=1</url>
+        </repository>
+    </distributionManagement>
 
 </project>

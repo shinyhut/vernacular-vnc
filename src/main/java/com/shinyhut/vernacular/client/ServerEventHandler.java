@@ -20,6 +20,7 @@ public class ServerEventHandler {
     private final Framebuffer framebuffer;
 
     private boolean running;
+    private Thread eventLoop;
 
     ServerEventHandler(VncSession session, Consumer<VncException> errorHandler) {
         this.session = session;
@@ -32,7 +33,7 @@ public class ServerEventHandler {
 
         running = true;
 
-        new Thread(() -> {
+        eventLoop = new Thread(() -> {
             try {
                 int messageType;
                 while (running && ((messageType = in.read()) != -1)) {
@@ -74,14 +75,21 @@ public class ServerEventHandler {
                     errorHandler.accept(e);
                 }
             } finally {
-                stop();
+                running = false;
             }
+        });
 
-        }).start();
+        eventLoop.start();
     }
 
     void stop() {
         running = false;
+        try {
+            if (eventLoop != null) {
+                eventLoop.join(1000);
+            }
+        } catch (InterruptedException ignored) {
+        }
     }
 
 }

@@ -23,13 +23,14 @@ public class ClientEventHandler {
 
     private final VncSession session;
     private final Consumer<VncException> errorHandler;
-
+    private final List<Boolean> buttons = synchronizedList(new ArrayList<>());
     private final ReentrantLock outputLock = new ReentrantLock(true);
+
     private boolean running;
+    private Thread eventLoop;
 
     private int mouseX;
     private int mouseY;
-    private final List<Boolean> buttons = synchronizedList(new ArrayList<>());
 
     ClientEventHandler(VncSession session, Consumer<VncException> errorHandler) {
         this.session = session;
@@ -40,7 +41,7 @@ public class ClientEventHandler {
     void start() {
         running = true;
 
-        new Thread(() -> {
+        eventLoop = new Thread(() -> {
             try {
                 boolean firstRun = true;
                 while (running) {
@@ -51,17 +52,25 @@ public class ClientEventHandler {
                     pause();
                 }
             } catch (IOException e) {
-                errorHandler.accept(new UnexpectedVncException(e));
+                if (running) {
+                    errorHandler.accept(new UnexpectedVncException(e));
+                }
             } finally {
-                stop();
+                running = false;
             }
+        });
 
-        }).start();
-
+        eventLoop.start();
     }
 
     void stop() {
         running = false;
+        try {
+            if (eventLoop != null) {
+                eventLoop.join(1000);
+            }
+        } catch (InterruptedException ignored) {
+        }
     }
 
     void updateMouseButton(int button, boolean pressed) throws IOException {

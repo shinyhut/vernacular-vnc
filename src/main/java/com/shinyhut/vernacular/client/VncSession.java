@@ -88,11 +88,11 @@ public class VncSession {
     public void kill() {
         try {
             inputStream.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         } finally {
             try {
                 outputStream.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
     }

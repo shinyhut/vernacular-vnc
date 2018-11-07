@@ -4,6 +4,8 @@ import com.shinyhut.vernacular.client.VernacularClient;
 import com.shinyhut.vernacular.client.VernacularConfig;
 
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -30,6 +32,21 @@ public class VernacularViewer extends JFrame {
     private JMenuItem bpp16TrueColorMenuItem;
 
     private Image lastFrame;
+
+    private AncestorListener focusRequester = new AncestorListener() {
+        @Override
+        public void ancestorAdded(AncestorEvent event) {
+            event.getComponent().requestFocusInWindow();
+        }
+
+        @Override
+        public void ancestorRemoved(AncestorEvent event) {
+        }
+
+        @Override
+        public void ancestorMoved(AncestorEvent event) {
+        }
+    };
 
     private VernacularViewer() {
         initUI();
@@ -182,6 +199,7 @@ public class VernacularViewer extends JFrame {
     private void showConnectDialog() {
         JPanel connectDialog = new JPanel();
         JTextField hostField = new JTextField(20);
+        hostField.addAncestorListener(focusRequester);
         JTextField portField = new JTextField("5900");
         JLabel hostLabel = new JLabel("Host");
         hostLabel.setLabelFor(hostField);
@@ -213,6 +231,7 @@ public class VernacularViewer extends JFrame {
         String password = "";
         JPanel passwordDialog = new JPanel();
         JPasswordField passwordField = new JPasswordField(20);
+        passwordField.addAncestorListener(focusRequester);
         passwordDialog.add(passwordField);
         int choice = showConfirmDialog(this, passwordDialog, "Enter Password", OK_CANCEL_OPTION);
         if (choice == OK_OPTION) {

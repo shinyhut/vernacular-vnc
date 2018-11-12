@@ -3,6 +3,10 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 import com.shinyhut.vernacular.protocol.messages.ColorMapEntry;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +14,13 @@ import java.util.Optional;
 public class PixelDecoder {
 
     private static final ColorMapEntry BLACK = new ColorMapEntry(0, 0, 0);
+
+    public Pixel decode(InputStream in, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap) throws IOException {
+        DataInput dataInput = new DataInputStream(in);
+        byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
+        dataInput.readFully(bytes);
+        return decode(bytes, pixelFormat, colorMap);
+    }
 
     public Pixel decode(byte[] bytes, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap) {
         BigInteger value = new BigInteger(1, bytes);

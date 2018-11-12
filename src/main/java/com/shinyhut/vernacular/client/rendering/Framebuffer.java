@@ -2,10 +2,7 @@ package com.shinyhut.vernacular.client.rendering;
 
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.client.rendering.renderers.CopyRectRenderer;
-import com.shinyhut.vernacular.client.rendering.renderers.RRERenderer;
-import com.shinyhut.vernacular.client.rendering.renderers.RawRenderer;
-import com.shinyhut.vernacular.client.rendering.renderers.Renderer;
+import com.shinyhut.vernacular.client.rendering.renderers.*;
 import com.shinyhut.vernacular.protocol.messages.*;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
@@ -28,6 +25,7 @@ public class Framebuffer {
         RENDERERS.put(RAW, new RawRenderer());
         RENDERERS.put(COPYRECT, new CopyRectRenderer());
         RENDERERS.put(RRE, new RRERenderer());
+        RENDERERS.put(HEXTILE, new HextileRenderer());
     }
 
     private final VncSession session;

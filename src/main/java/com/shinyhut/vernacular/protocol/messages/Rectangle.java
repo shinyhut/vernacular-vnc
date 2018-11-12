@@ -2,11 +2,13 @@ package com.shinyhut.vernacular.protocol.messages;
 
 import com.shinyhut.vernacular.client.exceptions.UnsupportedEncodingException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import static com.shinyhut.vernacular.client.rendering.renderers.HextileRenderer.*;
 import static java.lang.System.arraycopy;
 
 public class Rectangle {
@@ -73,6 +75,65 @@ public class Rectangle {
                 byte[] subRecCountBytes = ByteBuffer.allocate(4).putInt(subRecCount).array();
                 arraycopy(subRecCountBytes, 0, pixelData, 0, subRecCountBytes.length);
                 arraycopy(remaining, 0, pixelData, 4, remaining.length);
+                break;
+            case HEXTILE:
+                ByteArrayOutputStream o = new ByteArrayOutputStream();
+                int horizontalTiles = (int) Math.ceil((double)width / 16);
+                int verticalTiles = (int) Math.ceil((double)height / 16);
+                for (int tileY = 0; tileY < verticalTiles; tileY++) {
+                    for (int tileX = 0; tileX < horizontalTiles; tileX++) {
+                        int subEncodingMask = dataInput.readUnsignedByte();
+                        o.write(subEncodingMask);
+
+                        boolean raw = (subEncodingMask & SUB_ENCODING_MASK_RAW) != 0;
+                        boolean backgroundSpecified = (subEncodingMask & SUB_ENCODING_MASK_BACKGROUND_SPECIFIED) != 0;
+                        boolean foregroundSpecified  = (subEncodingMask & SUB_ENCODING_MASK_FOREGROUND_SPECIFIED) != 0;
+                        boolean anySubRects = (subEncodingMask & SUB_ENCODING_MASK_ANY_SUBRECTS) != 0;
+                        boolean subrectsColored = (subEncodingMask & SUB_ENCODING_MASK_SUBRECTS_COLORED) != 0;
+
+                        if (raw) {
+                            int tileWidth;
+                            int tileHeight;
+
+                            if (tileX == horizontalTiles - 1) {
+                                tileWidth = width % 16 == 0 ? 16 : width % 16;
+                            } else {
+                                tileWidth = 16;
+                            }
+
+                            if (tileY == verticalTiles - 1) {
+                                tileHeight = height % 16 == 0 ? 16 : height % 16;
+                            } else {
+                                tileHeight = 16;
+                            }
+
+                            byte[] subPixelData = new byte[tileWidth * tileHeight * bytesPerPixel];
+                            dataInput.readFully(subPixelData);
+                            o.write(subPixelData);
+                        } else {
+                            if (backgroundSpecified) {
+                                byte[] background = new byte[bytesPerPixel];
+                                dataInput.readFully(background);
+                                o.write(background);
+                            }
+
+                            if (foregroundSpecified) {
+                                byte[] foreground = new byte[bytesPerPixel];
+                                dataInput.readFully(foreground);
+                                o.write(foreground);
+                            }
+
+                            if (anySubRects) {
+                                int numberOfsubRectangles = dataInput.readUnsignedByte();
+                                o.write(numberOfsubRectangles);
+                                byte[] rectangleData = new byte[numberOfsubRectangles * (subrectsColored ? bytesPerPixel + 2 : 2)];
+                                dataInput.readFully(rectangleData);
+                                o.write(rectangleData);
+                            }
+                        }
+                    }
+                }
+                pixelData = o.toByteArray();
                 break;
             case COPYRECT:
                 pixelData = new byte[4];

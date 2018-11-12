@@ -39,7 +39,7 @@ public class Initializer {
                 colorDepth.getBlueShift());
 
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
-        SetEncodings setEncodings = new SetEncodings(RRE, COPYRECT, RAW, DESKTOP_SIZE);
+        SetEncodings setEncodings = new SetEncodings(HEXTILE, RRE, COPYRECT, RAW, DESKTOP_SIZE);
 
         setPixelFormat.encode(out);
         setEncodings.encode(out);

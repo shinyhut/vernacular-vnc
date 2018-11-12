@@ -33,6 +33,10 @@ public class PixelFormat implements Encodable {
         return bitsPerPixel;
     }
 
+    public int getBytesPerPixel() {
+        return bitsPerPixel / 8;
+    }
+
     public int getDepth() {
         return depth;
     }

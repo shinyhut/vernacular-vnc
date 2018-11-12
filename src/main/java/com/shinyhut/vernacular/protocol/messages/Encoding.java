@@ -9,6 +9,7 @@ public enum Encoding {
     RAW(0),
     COPYRECT(1),
     RRE(2),
+    HEXTILE(5),
     DESKTOP_SIZE(-223)
     ;
 

@@ -11,17 +11,19 @@ import static java.lang.System.arraycopy;
 public class RawRenderer implements Renderer {
 
     private final PixelDecoder pixelDecoder;
+    private final PixelFormat pixelFormat;
 
-    public RawRenderer(PixelDecoder pixelDecoder) {
+    public RawRenderer(PixelDecoder pixelDecoder, PixelFormat pixelFormat) {
         this.pixelDecoder = pixelDecoder;
+        this.pixelFormat = pixelFormat;
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) {
-        render(destination, rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getPixelData(), pixelFormat);
+    public void render(BufferedImage destination, Rectangle rectangle) {
+        render(destination, rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getPixelData());
     }
 
-    public void render(BufferedImage destination, int x, int y, int width, byte[] pixelData, PixelFormat pixelFormat) {
+    public void render(BufferedImage destination, int x, int y, int width, byte[] pixelData) {
 
         int sx = x;
         int sy = y;

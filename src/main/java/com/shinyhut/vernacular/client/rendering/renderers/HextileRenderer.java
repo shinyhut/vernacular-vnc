@@ -22,16 +22,18 @@ public class HextileRenderer implements Renderer {
 
     private static final int TILE_SIZE = 16;
 
-    private final PixelDecoder pixelDecoder;
     private final RawRenderer rawRenderer;
+    private final PixelDecoder pixelDecoder;
+    private final PixelFormat pixelFormat;
 
-    public HextileRenderer(RawRenderer rawRenderer, PixelDecoder pixelDecoder) {
+    public HextileRenderer(RawRenderer rawRenderer, PixelDecoder pixelDecoder, PixelFormat pixelFormat) {
         this.pixelDecoder = pixelDecoder;
         this.rawRenderer = rawRenderer;
+        this.pixelFormat = pixelFormat;
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) throws VncException {
+    public void render(BufferedImage destination, Rectangle rectangle) throws VncException {
 
         byte[] pixelData = rectangle.getPixelData();
         int bytesPerPixel = pixelFormat.getBytesPerPixel();
@@ -53,10 +55,6 @@ public class HextileRenderer implements Renderer {
                     int subEncoding = dataInput.readUnsignedByte();
 
                     boolean raw = mask(subEncoding, SUB_ENCODING_MASK_RAW);
-                    boolean backgroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
-                    boolean foregroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
-                    boolean anySubrects = mask(subEncoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
-                    boolean subrectsColored = mask(subEncoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
 
                     int tileTopLeftX = rectangle.getX() + (tileX * TILE_SIZE);
                     int tileTopLeftY = rectangle.getY() + (tileY * TILE_SIZE);
@@ -79,10 +77,15 @@ public class HextileRenderer implements Renderer {
                     if (raw) {
                         byte[] subPixelData = new byte[tileWidth * tileHeight * bytesPerPixel];
                         dataInput.readFully(subPixelData);
-                        rawRenderer.render(destination, tileTopLeftX, tileTopLeftY, tileWidth, subPixelData, pixelFormat);
+                        rawRenderer.render(destination, tileTopLeftX, tileTopLeftY, tileWidth, subPixelData);
                     } else {
-                        Pixel background = optionalPixel(in, pixelFormat, backgroundSpecified, previousBackground);
-                        Pixel foreground = optionalPixel(in, pixelFormat, foregroundSpecified, previousForeground);
+                        boolean backgroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
+                        boolean foregroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
+                        boolean anySubrects = mask(subEncoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
+                        boolean subrectsColored = mask(subEncoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
+
+                        Pixel background = optionalPixel(in, backgroundSpecified, previousBackground);
+                        Pixel foreground = optionalPixel(in, foregroundSpecified, previousForeground);
                         previousBackground = background;
                         previousForeground = foreground;
 
@@ -93,7 +96,7 @@ public class HextileRenderer implements Renderer {
                             int subrectCount = dataInput.readUnsignedByte();
 
                             for (int s = 0; s < subrectCount; s++) {
-                                Pixel subrectColor = optionalPixel(in, pixelFormat, subrectsColored, foreground);
+                                Pixel subrectColor = optionalPixel(in, subrectsColored, foreground);
 
                                 int coords = dataInput.readUnsignedByte();
                                 int dimensions = dataInput.readUnsignedByte();
@@ -119,7 +122,7 @@ public class HextileRenderer implements Renderer {
         }
     }
 
-    private Pixel optionalPixel(InputStream in, PixelFormat pixelFormat, boolean present, Pixel defaultValue) throws IOException {
+    private Pixel optionalPixel(InputStream in, boolean present, Pixel defaultValue) throws IOException {
         Pixel pixel;
         if (present) {
             pixel = pixelDecoder.decode(in, pixelFormat);

@@ -16,7 +16,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 public class CopyRectRenderer implements Renderer {
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) throws VncException {
+    public void render(BufferedImage destination, Rectangle rectangle) throws VncException {
         try {
             DataInput dataInput = new DataInputStream(new ByteArrayInputStream(rectangle.getPixelData()));
             int srcX = dataInput.readUnsignedShort();

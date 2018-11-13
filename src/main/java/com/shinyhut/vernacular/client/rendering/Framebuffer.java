@@ -27,11 +27,11 @@ public class Framebuffer {
 
     public Framebuffer(VncSession session) {
         PixelDecoder pixelDecoder = new PixelDecoder(colorMap);
-        RawRenderer rawRenderer = new RawRenderer(pixelDecoder);
+        RawRenderer rawRenderer = new RawRenderer(pixelDecoder, session.getPixelFormat());
         renderers.put(RAW, rawRenderer);
         renderers.put(COPYRECT, new CopyRectRenderer());
-        renderers.put(RRE, new RRERenderer(pixelDecoder));
-        renderers.put(HEXTILE, new HextileRenderer(rawRenderer, pixelDecoder));
+        renderers.put(RRE, new RRERenderer(pixelDecoder, session.getPixelFormat()));
+        renderers.put(HEXTILE, new HextileRenderer(rawRenderer, pixelDecoder, session.getPixelFormat()));
 
         this.frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
         this.frame.setAccelerationPriority(1);
@@ -44,7 +44,7 @@ public class Framebuffer {
             if (rectangle.getEncoding() == DESKTOP_SIZE) {
                 resizeFramebuffer(rectangle);
             } else {
-                renderers.get(rectangle.getEncoding()).render(frame, rectangle, session.getPixelFormat());
+                renderers.get(rectangle.getEncoding()).render(frame, rectangle);
             }
         }
         paint();

@@ -15,14 +15,20 @@ public class PixelDecoder {
 
     private static final ColorMapEntry BLACK = new ColorMapEntry(0, 0, 0);
 
-    public Pixel decode(InputStream in, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap) throws IOException {
+    private final Map<BigInteger, ColorMapEntry> colorMap;
+
+    public PixelDecoder(Map<BigInteger, ColorMapEntry> colorMap) {
+        this.colorMap = colorMap;
+    }
+
+    public Pixel decode(InputStream in, PixelFormat pixelFormat) throws IOException {
         DataInput dataInput = new DataInputStream(in);
         byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
         dataInput.readFully(bytes);
-        return decode(bytes, pixelFormat, colorMap);
+        return decode(bytes, pixelFormat);
     }
 
-    public Pixel decode(byte[] bytes, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap) {
+    public Pixel decode(byte[] bytes, PixelFormat pixelFormat) {
         BigInteger value = new BigInteger(1, bytes);
 
         int red;

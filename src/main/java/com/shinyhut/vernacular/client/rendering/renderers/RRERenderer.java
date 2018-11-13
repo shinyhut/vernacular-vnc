@@ -19,13 +19,12 @@ public class RRERenderer implements Renderer {
 
     private final PixelDecoder pixelDecoder;
 
-    public RRERenderer() {
-        this.pixelDecoder = new PixelDecoder();
+    public RRERenderer(PixelDecoder pixelDecoder) {
+        this.pixelDecoder = pixelDecoder;
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat,
-                       Map<BigInteger, ColorMapEntry> colorMap) throws VncException {
+    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) throws VncException {
 
         byte[] pixelData = rectangle.getPixelData();
 
@@ -35,7 +34,7 @@ public class RRERenderer implements Renderer {
             int numberOfSubrectangles = dataInput.readInt();
             byte[] bgColorBytes = new byte[pixelFormat.getBytesPerPixel()];
             dataInput.readFully(bgColorBytes);
-            Pixel bgColor = pixelDecoder.decode(bgColorBytes, pixelFormat, colorMap);
+            Pixel bgColor = pixelDecoder.decode(bgColorBytes, pixelFormat);
 
             Graphics2D graphic = (Graphics2D) destination.getGraphics();
 
@@ -49,7 +48,7 @@ public class RRERenderer implements Renderer {
                 int y = dataInput.readUnsignedShort();
                 int width = dataInput.readUnsignedShort();
                 int height = dataInput.readUnsignedShort();
-                Pixel color = pixelDecoder.decode(bytes, pixelFormat, colorMap);
+                Pixel color = pixelDecoder.decode(bytes, pixelFormat);
                 graphic.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
                 graphic.fillRect(x + rectangle.getX(), y + rectangle.getY(), width, height);
             }

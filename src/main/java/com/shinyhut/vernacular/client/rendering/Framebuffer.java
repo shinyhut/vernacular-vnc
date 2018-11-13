@@ -19,21 +19,20 @@ import static java.time.LocalDateTime.now;
 
 public class Framebuffer {
 
-    private static final Map<Encoding, Renderer> RENDERERS = new ConcurrentHashMap<>();
-
-    static {
-        RENDERERS.put(RAW, new RawRenderer());
-        RENDERERS.put(COPYRECT, new CopyRectRenderer());
-        RENDERERS.put(RRE, new RRERenderer());
-        RENDERERS.put(HEXTILE, new HextileRenderer());
-    }
-
     private final VncSession session;
     private final Map<BigInteger, ColorMapEntry> colorMap = new ConcurrentHashMap<>();
+    private final Map<Encoding, Renderer> renderers = new ConcurrentHashMap<>();
 
     private BufferedImage frame;
 
     public Framebuffer(VncSession session) {
+        PixelDecoder pixelDecoder = new PixelDecoder(colorMap);
+        RawRenderer rawRenderer = new RawRenderer(pixelDecoder);
+        renderers.put(RAW, rawRenderer);
+        renderers.put(COPYRECT, new CopyRectRenderer());
+        renderers.put(RRE, new RRERenderer(pixelDecoder));
+        renderers.put(HEXTILE, new HextileRenderer(rawRenderer, pixelDecoder));
+
         this.frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
         this.frame.setAccelerationPriority(1);
         this.session = session;
@@ -45,7 +44,7 @@ public class Framebuffer {
             if (rectangle.getEncoding() == DESKTOP_SIZE) {
                 resizeFramebuffer(rectangle);
             } else {
-                RENDERERS.get(rectangle.getEncoding()).render(frame, rectangle, session.getPixelFormat(), colorMap);
+                renderers.get(rectangle.getEncoding()).render(frame, rectangle, session.getPixelFormat());
             }
         }
         paint();

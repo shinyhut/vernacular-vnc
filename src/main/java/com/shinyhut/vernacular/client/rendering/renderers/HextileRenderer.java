@@ -2,16 +2,12 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.protocol.messages.ColorMapEntry;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
-import com.shinyhut.vernacular.utils.ByteUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.math.BigInteger;
-import java.util.Map;
 
 import static com.shinyhut.vernacular.utils.ByteUtils.mask;
 import static java.lang.Math.ceil;
@@ -29,14 +25,13 @@ public class HextileRenderer implements Renderer {
     private final PixelDecoder pixelDecoder;
     private final RawRenderer rawRenderer;
 
-    public HextileRenderer() {
-        this.pixelDecoder = new PixelDecoder();
-        this.rawRenderer = new RawRenderer();
+    public HextileRenderer(RawRenderer rawRenderer, PixelDecoder pixelDecoder) {
+        this.pixelDecoder = pixelDecoder;
+        this.rawRenderer = rawRenderer;
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat,
-                       Map<BigInteger, ColorMapEntry> colorMap) throws VncException {
+    public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat) throws VncException {
 
         byte[] pixelData = rectangle.getPixelData();
         int bytesPerPixel = pixelFormat.getBytesPerPixel();
@@ -84,10 +79,10 @@ public class HextileRenderer implements Renderer {
                     if (raw) {
                         byte[] subPixelData = new byte[tileWidth * tileHeight * bytesPerPixel];
                         dataInput.readFully(subPixelData);
-                        rawRenderer.render(destination, tileTopLeftX, tileTopLeftY, tileWidth, subPixelData, pixelFormat, colorMap);
+                        rawRenderer.render(destination, tileTopLeftX, tileTopLeftY, tileWidth, subPixelData, pixelFormat);
                     } else {
-                        Pixel background = optionalPixel(in, pixelFormat, colorMap, backgroundSpecified, previousBackground);
-                        Pixel foreground = optionalPixel(in, pixelFormat, colorMap, foregroundSpecified, previousForeground);
+                        Pixel background = optionalPixel(in, pixelFormat, backgroundSpecified, previousBackground);
+                        Pixel foreground = optionalPixel(in, pixelFormat, foregroundSpecified, previousForeground);
                         previousBackground = background;
                         previousForeground = foreground;
 
@@ -98,7 +93,7 @@ public class HextileRenderer implements Renderer {
                             int subrectCount = dataInput.readUnsignedByte();
 
                             for (int s = 0; s < subrectCount; s++) {
-                                Pixel subrectColor = optionalPixel(in, pixelFormat, colorMap, subrectsColored, foreground);
+                                Pixel subrectColor = optionalPixel(in, pixelFormat, subrectsColored, foreground);
 
                                 int coords = dataInput.readUnsignedByte();
                                 int dimensions = dataInput.readUnsignedByte();
@@ -109,11 +104,11 @@ public class HextileRenderer implements Renderer {
                                 int width = (dimensions >> 4) + 1;
                                 int height = (dimensions & 0x0f) + 1;
 
-                                int screenX = tileTopLeftX + subrectTopLeftX;
-                                int screenY = tileTopLeftY + subrectTopLeftY;
+                                int sx = tileTopLeftX + subrectTopLeftX;
+                                int sy = tileTopLeftY + subrectTopLeftY;
 
                                 graphics.setColor(new Color(subrectColor.getRed(), subrectColor.getGreen(), subrectColor.getBlue()));
-                                graphics.fillRect(screenX, screenY, width, height);
+                                graphics.fillRect(sx, sy, width, height);
                             }
                         }
                     }
@@ -124,11 +119,10 @@ public class HextileRenderer implements Renderer {
         }
     }
 
-    private Pixel optionalPixel(InputStream in, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap,
-                                boolean present, Pixel defaultValue) throws IOException {
+    private Pixel optionalPixel(InputStream in, PixelFormat pixelFormat, boolean present, Pixel defaultValue) throws IOException {
         Pixel pixel;
         if (present) {
-            pixel = pixelDecoder.decode(in, pixelFormat, colorMap);
+            pixel = pixelDecoder.decode(in, pixelFormat);
         } else {
             pixel = defaultValue;
         }

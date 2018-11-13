@@ -5,6 +5,7 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.ColorMapEntry;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
+import com.shinyhut.vernacular.utils.ByteUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -12,8 +13,8 @@ import java.io.*;
 import java.math.BigInteger;
 import java.util.Map;
 
+import static com.shinyhut.vernacular.utils.ByteUtils.mask;
 import static java.lang.Math.ceil;
-import static java.lang.System.arraycopy;
 
 public class HextileRenderer implements Renderer {
 
@@ -26,9 +27,11 @@ public class HextileRenderer implements Renderer {
     private static final int TILE_SIZE = 16;
 
     private final PixelDecoder pixelDecoder;
+    private final RawRenderer rawRenderer;
 
     public HextileRenderer() {
         this.pixelDecoder = new PixelDecoder();
+        this.rawRenderer = new RawRenderer();
     }
 
     @Override
@@ -36,18 +39,15 @@ public class HextileRenderer implements Renderer {
                        Map<BigInteger, ColorMapEntry> colorMap) throws VncException {
 
         byte[] pixelData = rectangle.getPixelData();
-        int bytesPerPixel = pixelFormat.getBitsPerPixel() / 8;
+        int bytesPerPixel = pixelFormat.getBytesPerPixel();
 
         InputStream in = new ByteArrayInputStream(pixelData);
         DataInput dataInput = new DataInputStream(in);
 
         Graphics2D graphics = (Graphics2D) destination.getGraphics();
 
-        int rectangleWidth = rectangle.getWidth();
-        int rectangleHeight = rectangle.getHeight();
-
-        int horizontalTileCount = (int) ceil((double) rectangleWidth / TILE_SIZE);
-        int verticalTileCount = (int) ceil((double) rectangleHeight / TILE_SIZE);
+        int horizontalTileCount = (int) ceil((double) rectangle.getWidth() / TILE_SIZE);
+        int verticalTileCount = (int) ceil((double) rectangle.getHeight() / TILE_SIZE);
 
         Pixel previousBackground = null;
         Pixel previousForeground = null;
@@ -55,13 +55,13 @@ public class HextileRenderer implements Renderer {
         for (int tileY = 0; tileY < verticalTileCount; tileY++) {
             for (int tileX = 0; tileX < horizontalTileCount; tileX++) {
                 try {
-                    int subEncodingMask = dataInput.readUnsignedByte();
+                    int subEncoding = dataInput.readUnsignedByte();
 
-                    boolean raw = (subEncodingMask & SUB_ENCODING_MASK_RAW) != 0;
-                    boolean backgroundSpecified = (subEncodingMask & SUB_ENCODING_MASK_BACKGROUND_SPECIFIED) != 0;
-                    boolean foregroundSpecified = (subEncodingMask & SUB_ENCODING_MASK_FOREGROUND_SPECIFIED) != 0;
-                    boolean anySubrects = (subEncodingMask & SUB_ENCODING_MASK_ANY_SUBRECTS) != 0;
-                    boolean subrectsColored = (subEncodingMask & SUB_ENCODING_MASK_SUBRECTS_COLORED) != 0;
+                    boolean raw = mask(subEncoding, SUB_ENCODING_MASK_RAW);
+                    boolean backgroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
+                    boolean foregroundSpecified = mask(subEncoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
+                    boolean anySubrects = mask(subEncoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
+                    boolean subrectsColored = mask(subEncoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
 
                     int tileTopLeftX = rectangle.getX() + (tileX * TILE_SIZE);
                     int tileTopLeftY = rectangle.getY() + (tileY * TILE_SIZE);
@@ -69,14 +69,14 @@ public class HextileRenderer implements Renderer {
                     int tileWidth;
                     int tileHeight;
 
-                    if (tileX == horizontalTileCount - 1 && rectangleWidth % TILE_SIZE != 0) {
-                        tileWidth = rectangleWidth % TILE_SIZE;
+                    if (tileX == horizontalTileCount - 1 && rectangle.getWidth() % TILE_SIZE != 0) {
+                        tileWidth = rectangle.getWidth() % TILE_SIZE;
                     } else {
                         tileWidth = TILE_SIZE;
                     }
 
-                    if (tileY == verticalTileCount - 1 && rectangleHeight % TILE_SIZE != 0) {
-                        tileHeight = rectangleHeight % TILE_SIZE;
+                    if (tileY == verticalTileCount - 1 && rectangle.getHeight() % TILE_SIZE != 0) {
+                        tileHeight = rectangle.getHeight() % TILE_SIZE;
                     } else {
                         tileHeight = TILE_SIZE;
                     }
@@ -84,38 +84,12 @@ public class HextileRenderer implements Renderer {
                     if (raw) {
                         byte[] subPixelData = new byte[tileWidth * tileHeight * bytesPerPixel];
                         dataInput.readFully(subPixelData);
-
-                        int screenX = tileTopLeftX;
-                        int screenY = tileTopLeftY;
-
-                        for (int i = 0; i <= subPixelData.length - bytesPerPixel; i += bytesPerPixel) {
-                            byte[] bytes = new byte[bytesPerPixel];
-                            arraycopy(subPixelData, i, bytes, 0, bytes.length);
-                            Pixel pixel = pixelDecoder.decode(bytes, pixelFormat, colorMap);
-                            destination.setRGB(screenX, screenY, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
-                            screenX++;
-                            if (screenX == (rectangle.getX() + (tileX * TILE_SIZE + tileWidth))) {
-                                screenX = tileTopLeftX;
-                                screenY++;
-                            }
-                        }
-
+                        rawRenderer.render(destination, tileTopLeftX, tileTopLeftY, tileWidth, subPixelData, pixelFormat, colorMap);
                     } else {
-                        Pixel background;
-                        if (backgroundSpecified) {
-                            background = pixelDecoder.decode(in, pixelFormat, colorMap);
-                            previousBackground = background;
-                        } else {
-                            background = previousBackground;
-                        }
-
-                        Pixel foreground;
-                        if (foregroundSpecified) {
-                            foreground = pixelDecoder.decode(in, pixelFormat, colorMap);
-                            previousForeground = foreground;
-                        } else {
-                            foreground = previousForeground;
-                        }
+                        Pixel background = optionalPixel(in, pixelFormat, colorMap, backgroundSpecified, previousBackground);
+                        Pixel foreground = optionalPixel(in, pixelFormat, colorMap, foregroundSpecified, previousForeground);
+                        previousBackground = background;
+                        previousForeground = foreground;
 
                         graphics.setColor(new Color(background.getRed(), background.getGreen(), background.getBlue()));
                         graphics.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight);
@@ -124,25 +98,22 @@ public class HextileRenderer implements Renderer {
                             int subrectCount = dataInput.readUnsignedByte();
 
                             for (int s = 0; s < subrectCount; s++) {
-                                Pixel pixelColor;
-                                if (subrectsColored) {
-                                    pixelColor = pixelDecoder.decode(in, pixelFormat, colorMap);
-                                } else {
-                                    pixelColor = foreground;
-                                }
+                                Pixel subrectColor = optionalPixel(in, pixelFormat, colorMap, subrectsColored, foreground);
 
                                 int coords = dataInput.readUnsignedByte();
                                 int dimensions = dataInput.readUnsignedByte();
 
-                                int x = coords >> 4;
-                                int y = coords & 0x0f;
+                                int subrectTopLeftX = coords >> 4;
+                                int subrectTopLeftY = coords & 0x0f;
 
                                 int width = (dimensions >> 4) + 1;
                                 int height = (dimensions & 0x0f) + 1;
 
-                                graphics.setColor(new Color(pixelColor.getRed(), pixelColor.getGreen(), pixelColor.getBlue()));
-                                graphics.fillRect(tileTopLeftX + x, tileTopLeftY + y, width, height);
+                                int screenX = tileTopLeftX + subrectTopLeftX;
+                                int screenY = tileTopLeftY + subrectTopLeftY;
 
+                                graphics.setColor(new Color(subrectColor.getRed(), subrectColor.getGreen(), subrectColor.getBlue()));
+                                graphics.fillRect(screenX, screenY, width, height);
                             }
                         }
                     }
@@ -151,6 +122,17 @@ public class HextileRenderer implements Renderer {
                 }
             }
         }
+    }
+
+    private Pixel optionalPixel(InputStream in, PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap,
+                                boolean present, Pixel defaultValue) throws IOException {
+        Pixel pixel;
+        if (present) {
+            pixel = pixelDecoder.decode(in, pixelFormat, colorMap);
+        } else {
+            pixel = defaultValue;
+        }
+        return pixel;
     }
 
 }

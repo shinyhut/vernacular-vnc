@@ -20,4 +20,8 @@ public class ByteUtils {
         }
         return result;
     }
+
+    public static boolean mask(int input, int mask) {
+        return (input & mask) != 0;
+    }
 }

@@ -28,13 +28,12 @@ public class RRERenderer implements Renderer {
                        Map<BigInteger, ColorMapEntry> colorMap) throws VncException {
 
         byte[] pixelData = rectangle.getPixelData();
-        int bytesPerPixel = pixelFormat.getBitsPerPixel() / 8;
 
         DataInput dataInput = new DataInputStream(new ByteArrayInputStream(pixelData));
 
         try {
             int numberOfSubrectangles = dataInput.readInt();
-            byte[] bgColorBytes = new byte[bytesPerPixel];
+            byte[] bgColorBytes = new byte[pixelFormat.getBytesPerPixel()];
             dataInput.readFully(bgColorBytes);
             Pixel bgColor = pixelDecoder.decode(bgColorBytes, pixelFormat, colorMap);
 
@@ -44,7 +43,7 @@ public class RRERenderer implements Renderer {
             graphic.fillRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
 
             for (int i = 0; i < numberOfSubrectangles; i++) {
-                byte[] bytes = new byte[bytesPerPixel];
+                byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
                 dataInput.readFully(bytes);
                 int x = dataInput.readUnsignedShort();
                 int y = dataInput.readUnsignedShort();

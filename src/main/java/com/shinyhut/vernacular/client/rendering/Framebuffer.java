@@ -51,7 +51,7 @@ public class Framebuffer {
         paint();
     }
 
-    public void paint() {
+    private void paint() {
         Consumer<Image> listener = session.getConfig().getFramebufferUpdateListener();
         if (listener != null) {
             listener.accept(frame);

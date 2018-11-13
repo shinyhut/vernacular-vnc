@@ -23,21 +23,25 @@ public class RawRenderer implements Renderer {
     public void render(BufferedImage destination, Rectangle rectangle, PixelFormat pixelFormat,
                        Map<BigInteger, ColorMapEntry> colorMap) {
 
-        byte[] pixelData = rectangle.getPixelData();
-        int bytesPerPixel = pixelFormat.getBitsPerPixel() / 8;
+        render(destination, rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getPixelData(),
+                pixelFormat, colorMap);
+    }
 
-        int x = rectangle.getX();
-        int y = rectangle.getY();
+    public void render(BufferedImage destination, int topLeftX, int topLeftY, int width, byte[] pixelData,
+                       PixelFormat pixelFormat, Map<BigInteger, ColorMapEntry> colorMap) {
 
-        for (int i = 0; i <= pixelData.length - bytesPerPixel; i += bytesPerPixel) {
-            byte[] bytes = new byte[bytesPerPixel];
+        int screenX = topLeftX;
+        int screenY = topLeftY;
+
+        for (int i = 0; i <= pixelData.length - pixelFormat.getBytesPerPixel(); i += pixelFormat.getBytesPerPixel()) {
+            byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
             arraycopy(pixelData, i, bytes, 0, bytes.length);
             Pixel pixel = pixelDecoder.decode(bytes, pixelFormat, colorMap);
-            destination.setRGB(x, y, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
-            x++;
-            if (x == rectangle.getX() + rectangle.getWidth()) {
-                x = rectangle.getX();
-                y++;
+            destination.setRGB(screenX, screenY, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
+            screenX++;
+            if (screenX == topLeftX + width) {
+                screenX = topLeftX;
+                screenY++;
             }
         }
     }

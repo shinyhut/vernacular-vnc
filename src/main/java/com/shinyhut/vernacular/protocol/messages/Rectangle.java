@@ -1,6 +1,8 @@
 package com.shinyhut.vernacular.protocol.messages;
 
 import com.shinyhut.vernacular.client.exceptions.UnsupportedEncodingException;
+import com.shinyhut.vernacular.client.rendering.renderers.HextileRenderer;
+import com.shinyhut.vernacular.utils.ByteUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -9,6 +11,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import static com.shinyhut.vernacular.client.rendering.renderers.HextileRenderer.*;
+import static com.shinyhut.vernacular.utils.ByteUtils.mask;
 import static java.lang.System.arraycopy;
 
 public class Rectangle {
@@ -77,73 +80,58 @@ public class Rectangle {
                 arraycopy(remaining, 0, pixelData, 4, remaining.length);
                 break;
             case HEXTILE:
-                ByteArrayOutputStream o = new ByteArrayOutputStream();
-                int horizontalTiles = (int) Math.ceil((double)width / 16);
-                int verticalTiles = (int) Math.ceil((double)height / 16);
-                for (int tileY = 0; tileY < verticalTiles; tileY++) {
-                    for (int tileX = 0; tileX < horizontalTiles; tileX++) {
-                        int subEncodingMask = dataInput.readUnsignedByte();
-                        o.write(subEncodingMask);
-
-                        boolean raw = (subEncodingMask & SUB_ENCODING_MASK_RAW) != 0;
-                        boolean backgroundSpecified = (subEncodingMask & SUB_ENCODING_MASK_BACKGROUND_SPECIFIED) != 0;
-                        boolean foregroundSpecified  = (subEncodingMask & SUB_ENCODING_MASK_FOREGROUND_SPECIFIED) != 0;
-                        boolean anySubRects = (subEncodingMask & SUB_ENCODING_MASK_ANY_SUBRECTS) != 0;
-                        boolean subrectsColored = (subEncodingMask & SUB_ENCODING_MASK_SUBRECTS_COLORED) != 0;
-
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                int horizontalTiles = (int) Math.ceil((double) width / 16);
+                int verticalTiles = (int) Math.ceil((double) height / 16);
+                for (int ty = 0; ty < verticalTiles; ty++) {
+                    for (int tx = 0; tx < horizontalTiles; tx++) {
+                        int subencoding = dataInput.readUnsignedByte();
+                        bytes.write(subencoding);
+                        boolean raw = mask(subencoding, SUB_ENCODING_MASK_RAW);
                         if (raw) {
-                            int tileWidth;
-                            int tileHeight;
-
-                            if (tileX == horizontalTiles - 1) {
-                                tileWidth = width % 16 == 0 ? 16 : width % 16;
-                            } else {
-                                tileWidth = 16;
-                            }
-
-                            if (tileY == verticalTiles - 1) {
-                                tileHeight = height % 16 == 0 ? 16 : height % 16;
-                            } else {
-                                tileHeight = 16;
-                            }
-
+                            int tileWidth = tileSize(tx, horizontalTiles, width);
+                            int tileHeight = tileSize(ty, verticalTiles, height);
                             byte[] subPixelData = new byte[tileWidth * tileHeight * bytesPerPixel];
                             dataInput.readFully(subPixelData);
-                            o.write(subPixelData);
+                            bytes.write(subPixelData);
                         } else {
+                            boolean backgroundSpecified = mask(subencoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
+                            boolean foregroundSpecified = mask(subencoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
+                            boolean anySubrects = mask(subencoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
+                            boolean subrectsColored = mask(subencoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
                             if (backgroundSpecified) {
                                 byte[] background = new byte[bytesPerPixel];
                                 dataInput.readFully(background);
-                                o.write(background);
+                                bytes.write(background);
                             }
-
                             if (foregroundSpecified) {
                                 byte[] foreground = new byte[bytesPerPixel];
                                 dataInput.readFully(foreground);
-                                o.write(foreground);
+                                bytes.write(foreground);
                             }
-
-                            if (anySubRects) {
-                                int numberOfsubRectangles = dataInput.readUnsignedByte();
-                                o.write(numberOfsubRectangles);
-                                byte[] rectangleData = new byte[numberOfsubRectangles * (subrectsColored ? bytesPerPixel + 2 : 2)];
+                            if (anySubrects) {
+                                int subrectCount = dataInput.readUnsignedByte();
+                                bytes.write(subrectCount);
+                                int subrectDataLength = subrectCount * (subrectsColored ? bytesPerPixel + 2 : 2);
+                                byte[] rectangleData = new byte[subrectDataLength];
                                 dataInput.readFully(rectangleData);
-                                o.write(rectangleData);
+                                bytes.write(rectangleData);
                             }
                         }
                     }
                 }
-                pixelData = o.toByteArray();
+                pixelData = bytes.toByteArray();
                 break;
             case COPYRECT:
                 pixelData = new byte[4];
                 dataInput.readFully(pixelData);
                 break;
             case RAW:
-            default:
                 pixelData = new byte[width * height * bytesPerPixel];
                 dataInput.readFully(pixelData);
                 break;
+            default:
+                throw new UnsupportedEncodingException(encoding.getCode());
         }
         return new Rectangle(x, y, width, height, encoding, pixelData);
     }

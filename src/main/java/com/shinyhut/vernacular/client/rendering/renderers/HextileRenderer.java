@@ -82,7 +82,7 @@ public class HextileRenderer implements Renderer {
         }
     }
 
-    private int tileSize(int tileNo, int tileCount, int rectangleSize) {
+    public static int tileSize(int tileNo, int tileCount, int rectangleSize) {
         return tileNo == tileCount - 1 && rectangleSize % TILE_SIZE != 0 ? rectangleSize % TILE_SIZE : TILE_SIZE;
     }
 

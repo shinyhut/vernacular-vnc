@@ -14,9 +14,13 @@ import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_16_TRUE;
 import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.EventQueue.invokeLater;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.awt.event.KeyEvent.*;
 import static java.lang.Integer.parseInt;
+import static java.lang.Math.min;
 import static java.lang.System.exit;
 import static javax.swing.JOptionPane.*;
 
@@ -129,7 +133,9 @@ public class VernacularViewer extends JFrame {
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 if (lastFrame != null) {
-                    g.drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
+                    Graphics2D g2 = (Graphics2D) g;
+                    g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+                    g2.drawImage(lastFrame, 0, 0, getContentPane().getWidth(), getContentPane().getHeight(), null);
                 }
             }
         }, CENTER);
@@ -286,24 +292,20 @@ public class VernacularViewer extends JFrame {
     private void resizeWindow(Image frame) {
         int remoteWidth = frame.getWidth(null);
         int remoteHeight = frame.getHeight(null);
-        Dimension screenSize = getDefaultToolkit().getScreenSize();
-        int maxWidth = (int) screenSize.getWidth();
-        int maxHeight = (int) screenSize.getHeight();
+        Rectangle screenSize = getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        int paddingTop = getHeight() - getContentPane().getHeight();
+        int paddingSides = getWidth() - getContentPane().getWidth();
+        int maxWidth = (int) screenSize.getWidth() - paddingSides;
+        int maxHeight = (int) screenSize.getHeight() - paddingTop;
         if (remoteWidth <= maxWidth && remoteHeight < maxHeight) {
             setWindowSize(remoteWidth, remoteHeight);
         } else {
-            int scaledWidth;
-            int scaledHeight;
-            if (remoteWidth >= remoteHeight) {
-                scaledWidth = maxWidth;
-                scaledHeight = (int) (remoteHeight * ((double) maxWidth / remoteWidth));
-            } else {
-                scaledHeight = maxHeight;
-                scaledWidth = (int) (remoteWidth * ((double) maxHeight / remoteHeight));
-            }
+            double scale = min((double) maxWidth / remoteWidth, (double) maxHeight / remoteHeight);
+            int scaledWidth = (int) (remoteWidth * scale);
+            int scaledHeight = (int) (remoteHeight * scale);
             setWindowSize(scaledWidth, scaledHeight);
         }
-        setLocation(0, 0);
+        setLocationRelativeTo(null);
     }
 
     private void setWindowSize(int width, int height) {

@@ -43,12 +43,10 @@ public class ClientEventHandler {
 
         eventLoop = new Thread(() -> {
             try {
-                boolean firstRun = true;
                 while (running) {
                     if (timeForFramebufferUpdate()) {
-                        requestFramebufferUpdate(!firstRun);
+                        requestFramebufferUpdate();
                     }
-                    firstRun = false;
                     pause();
                 }
             } catch (IOException e) {
@@ -96,13 +94,16 @@ public class ClientEventHandler {
 
     private boolean timeForFramebufferUpdate() {
         long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
-        return session.getLastFramebufferUpdateTime()
+        return session.getLastFramebufferUpdateRequestTime()
                 .map(lastUpdate -> now().isAfter(lastUpdate.plus(updateInterval, MILLIS)))
                 .orElse(true);
     }
 
-    private void requestFramebufferUpdate(boolean incremental) throws IOException {
-        if (!incremental || session.getLastFramebufferUpdateTime().isPresent()) {
+    private void requestFramebufferUpdate() throws IOException {
+        boolean incremental = session.getLastFramebufferUpdateTime().isPresent();
+        boolean firstRun = !session.getLastFramebufferUpdateRequestTime().isPresent();
+        if (firstRun || incremental) {
+            session.setLastFramebufferUpdateRequestTime(now());
             int width = session.getFramebufferWidth();
             int height = session.getFramebufferHeight();
             FramebufferUpdateRequest updateRequest = new FramebufferUpdateRequest(incremental, 0, 0, width, height);

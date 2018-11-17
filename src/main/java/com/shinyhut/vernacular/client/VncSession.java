@@ -24,6 +24,7 @@ public class VncSession {
     private int framebufferHeight;
 
     private LocalDateTime lastFramebufferUpdateTime;
+    private LocalDateTime lastFramebufferUpdateRequestTime;
 
     public VncSession(String host, int port, VernacularConfig config, InputStream inputStream, OutputStream outputStream) {
         this.host = host;
@@ -67,6 +68,14 @@ public class VncSession {
 
     public void setLastFramebufferUpdateTime(LocalDateTime lastFramebufferUpdateTime) {
         this.lastFramebufferUpdateTime = lastFramebufferUpdateTime;
+    }
+
+    public Optional<LocalDateTime> getLastFramebufferUpdateRequestTime() {
+        return Optional.ofNullable(lastFramebufferUpdateRequestTime);
+    }
+
+    public void setLastFramebufferUpdateRequestTime(LocalDateTime lastFramebufferUpdateRequestTime) {
+        this.lastFramebufferUpdateRequestTime = lastFramebufferUpdateRequestTime;
     }
 
     public int getFramebufferWidth() {

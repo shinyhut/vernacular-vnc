@@ -79,6 +79,7 @@ public class VernacularViewer extends JFrame {
     }
 
     private void addKeyListener() {
+        setFocusTraversalKeysEnabled(false);
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

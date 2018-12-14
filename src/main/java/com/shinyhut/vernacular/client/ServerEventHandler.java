@@ -19,7 +19,7 @@ public class ServerEventHandler {
     private final Consumer<VncException> errorHandler;
     private final Framebuffer framebuffer;
 
-    private boolean running;
+    private volatile boolean running;
     private Thread eventLoop;
 
     ServerEventHandler(VncSession session, Consumer<VncException> errorHandler) {

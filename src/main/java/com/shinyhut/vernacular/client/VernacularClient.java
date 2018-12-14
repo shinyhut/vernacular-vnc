@@ -26,7 +26,7 @@ public class VernacularClient {
     private ClientEventHandler clientEventHandler;
     private ServerEventHandler serverEventHandler;
 
-    private boolean running;
+    private volatile boolean running;
 
     /**
      * Creates a new VNC client using the specified configuration object
@@ -143,6 +143,21 @@ public class VernacularClient {
         if (clientEventHandler != null) {
             try {
                 clientEventHandler.keyPress(keySym, pressed);
+            } catch (IOException e) {
+                handleError(new UnexpectedVncException(e));
+            }
+        }
+    }
+
+    /**
+     * Copies the specified text to the remote clipboard
+     *
+     * @param text The text to be copied to the remote clipboard
+     */
+    public void copyText(String text) {
+        if (clientEventHandler != null) {
+            try {
+                clientEventHandler.copyText(text);
             } catch (IOException e) {
                 handleError(new UnexpectedVncException(e));
             }

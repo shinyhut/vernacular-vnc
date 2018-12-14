@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 
@@ -18,10 +19,12 @@ import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.Toolkit.getDefaultToolkit;
+import static java.awt.datatransfer.DataFlavor.stringFlavor;
 import static java.awt.event.KeyEvent.*;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.min;
 import static java.lang.System.exit;
+import static java.lang.Thread.sleep;
 import static javax.swing.JOptionPane.*;
 
 public class VernacularViewer extends JFrame {
@@ -52,6 +55,23 @@ public class VernacularViewer extends JFrame {
         }
     };
 
+    private Thread clipboardMonitor = new Thread(() -> {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        String lastText = null;
+        while (running()) {
+            try {
+                String text = (String) clipboard.getData(stringFlavor);
+                if (text != null && !text.equals(lastText)) {
+                    client.copyText(text);
+                    lastText = text;
+                }
+                sleep(100L);
+            } catch (Exception ignored) {
+            }
+        }
+    });
+
     private VernacularViewer() {
         initUI();
     }
@@ -64,9 +84,7 @@ public class VernacularViewer extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
-                if (client != null) {
-                    client.stop();
-                }
+                disconnect();
                 super.windowClosing(event);
             }
         });
@@ -187,9 +205,7 @@ public class VernacularViewer extends JFrame {
         JMenuItem exit = new JMenuItem("Exit");
         exit.setMnemonic(VK_X);
         exit.addActionListener((ActionEvent event) -> {
-            if (client != null) {
-                client.stop();
-            }
+            disconnect();
             exit(0);
         });
 
@@ -251,11 +267,16 @@ public class VernacularViewer extends JFrame {
         setMenuState(true);
         lastFrame = null;
         client.start(host, port);
+        clipboardMonitor.start();
     }
 
     private void disconnect() {
         if (running()) {
             client.stop();
+            try {
+                clipboardMonitor.join();
+            } catch (InterruptedException ignored) {
+            }
         }
         setMenuState(false);
     }

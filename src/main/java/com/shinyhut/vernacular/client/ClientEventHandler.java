@@ -2,10 +2,7 @@ package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.protocol.messages.Encodable;
-import com.shinyhut.vernacular.protocol.messages.FramebufferUpdateRequest;
-import com.shinyhut.vernacular.protocol.messages.KeyEvent;
-import com.shinyhut.vernacular.protocol.messages.PointerEvent;
+import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +23,7 @@ public class ClientEventHandler {
     private final List<Boolean> buttons = synchronizedList(new ArrayList<>());
     private final ReentrantLock outputLock = new ReentrantLock(true);
 
-    private boolean running;
+    private volatile boolean running;
     private Thread eventLoop;
 
     private int mouseX;
@@ -87,6 +84,11 @@ public class ClientEventHandler {
         sendMessage(message);
     }
 
+    void copyText(String text) throws IOException {
+        ClientCutText message = new ClientCutText(text);
+        sendMessage(message);
+    }
+
     private void updateMouseStatus() throws IOException {
         PointerEvent message = new PointerEvent(mouseX, mouseY, buttons);
         sendMessage(message);
@@ -122,8 +124,8 @@ public class ClientEventHandler {
 
     private void pause() {
         try {
-            sleep(1l);
-        } catch (InterruptedException e) {
+            sleep(1L);
+        } catch (InterruptedException ignored) {
         }
     }
 }

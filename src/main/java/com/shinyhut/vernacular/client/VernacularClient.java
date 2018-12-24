@@ -11,9 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.stream.IntStream;
 
 import static java.awt.event.KeyEvent.KEY_PRESSED;
 import static java.awt.event.KeyEvent.KEY_RELEASED;
+import static java.awt.event.KeyEvent.KEY_TYPED;
+import static java.util.stream.IntStream.range;
 
 public class VernacularClient {
 
@@ -86,10 +89,10 @@ public class VernacularClient {
     }
 
     /**
-     * Notify the remote server the client has moved the mouse to the specified co-ordinates
+     * Moves the remote mouse pointer to the specified coordinates (relative to the top-left of the screen).
      *
-     * @param x The X co-ordinate
-     * @param y The Y co-ordinate
+     * @param x The X coordinate
+     * @param y The Y coordinate
      */
     public void moveMouse(int x, int y) {
         if (clientEventHandler != null) {
@@ -102,12 +105,12 @@ public class VernacularClient {
     }
 
     /**
-     * Updates the status (i.e. pressed or not pressed) of the specified mouse button.
+     * Updates the status (pressed or not pressed) of the specified mouse button.
+     * <p>
+     * To indicate a mouse 'click', call this method twice in quick succession, first with pressed = true,
+     * then with pressed = false, or use the convenience {@link #click(int)} method.
      *
-     * Note: to indicate a mouse 'click', call this method twice in rapid succession, first with pressed = true,
-     * then with pressed = false
-     *
-     * @param button The mouse button number (1-3)
+     * @param button  The mouse button number (1-3)
      * @param pressed Is the mouse button currently 'pressed'?
      */
     public void updateMouseButton(int button, boolean pressed) {
@@ -121,10 +124,26 @@ public class VernacularClient {
     }
 
     /**
-     * Updates the status (i.e. pressed or not pressed) of the key represented by the specified KeyEvent
+     * 'Clicks' (presses and releases) the specified mouse button.
+     * <p>
+     * This is equivalent to calling {@link #updateMouseButton(int, boolean)} twice in quick succession with
+     * pressed = true and pressed = false
      *
-     * @param event The KeyEvent for this key press or release (@see java.awt.event.KeyEvent KeyEvent)
+     * @param button The mouse button number (1-3)
      */
+    public void click(int button) {
+        updateMouseButton(button, true);
+        updateMouseButton(button, false);
+    }
+
+    /**
+     * Updates the status (pressed or not pressed) of the key represented by the specified KeyEvent
+     *
+     * @param event The KeyEvent for this key press or release
+     * @see java.awt.event.KeyEvent KeyEvent
+     * @deprecated See {@link #handleKeyEvent(KeyEvent)}
+     */
+    @Deprecated
     public void keyPress(KeyEvent event) {
         if (event.getID() == KEY_PRESSED || event.getID() == KEY_RELEASED) {
             KeySyms.forEvent(event).ifPresent(k -> keyPress(k, event.getID() == KEY_PRESSED));
@@ -132,21 +151,86 @@ public class VernacularClient {
     }
 
     /**
-     * Updates the status (i.e. pressed or not pressed) of the key represented by the specified KeySym
+     * Presses, releases or 'types' the key represented by the specified KeyEvent.
+     * <p>
+     * The event type should be one of KEY_PRESSED, KEY_RELEASED or KEY_TYPED. All other event types are ignored.
      *
+     * @param event The KeyEvent to handle
+     * @see java.awt.event.KeyEvent KeyEvent
+     */
+    public void handleKeyEvent(KeyEvent event) {
+        KeySyms.forEvent(event).ifPresent(k -> {
+            switch (event.getID()) {
+                case KEY_PRESSED:
+                case KEY_RELEASED:
+                    updateKey(k, event.getID() == KEY_PRESSED);
+                    break;
+                case KEY_TYPED:
+                    type(k);
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Updates the status (pressed or not pressed) of the key represented by the specified KeySym
+     * <p>
      * For a complete list of KeySyms, see https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
      *
-     * @param keySym The KeySym for this key press or release
+     * @param keySym  The KeySym for this key press or release
+     * @param pressed Was the key pressed (true) or released (false)?
+     * @deprecated See {@link #updateKey(int, boolean)}
+     */
+    @Deprecated
+    public void keyPress(int keySym, boolean pressed) {
+        updateKey(keySym, pressed);
+    }
+
+    /**
+     * Updates the status (pressed or not pressed) of the key represented by the specified KeySym
+     * <p>
+     * For a complete list of KeySyms, see https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
+     *
+     * @param keySym  The KeySym for this key press or release
      * @param pressed Was the key pressed (true) or released (false)?
      */
-    public void keyPress(int keySym, boolean pressed) {
+    public void updateKey(int keySym, boolean pressed) {
         if (clientEventHandler != null) {
             try {
-                clientEventHandler.keyPress(keySym, pressed);
+                clientEventHandler.updateKey(keySym, pressed);
             } catch (IOException e) {
                 handleError(new UnexpectedVncException(e));
             }
         }
+    }
+
+    /**
+     * 'Types' (presses and releases) the key represented by the specified KeySym.
+     * <p>
+     * This is equivalent to calling {@link #updateKey(int, boolean)} twice in quick succession with
+     * pressed = true and pressed = false
+     *
+     * @param keySym The KeySym for this key press or release
+     */
+    public void type(int keySym) {
+        updateKey(keySym, true);
+        updateKey(keySym, false);
+    }
+
+    /**
+     * 'Types' (presses and releases) the key representing each character in the specified string, in order.
+     * <p>
+     * Note that this is only guaranteed to work as expected for strings containing only printable ASCII characters -
+     * apart from line breaks, which are converted into ENTER key presses.
+     *
+     * @param text The text that will be typed on the remote server
+     */
+    public void type(String text) {
+        text = text.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+        range(0, text.length())
+                .map(text::charAt)
+                .map(c -> c == '\n' ? 0xff0d : c == '\t' ? 0xff09 : c)
+                .forEach(this::type);
     }
 
     /**

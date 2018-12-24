@@ -79,7 +79,7 @@ public class ClientEventHandler {
         updateMouseStatus();
     }
 
-    void keyPress(int keySym, boolean pressed) throws IOException {
+    void updateKey(int keySym, boolean pressed) throws IOException {
         KeyEvent message = new KeyEvent(keySym, pressed);
         sendMessage(message);
     }

@@ -112,14 +112,14 @@ public class VernacularViewer extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (connected()) {
-                    client.keyPress(e);
+                    client.handleKeyEvent(e);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 if (connected()) {
-                    client.keyPress(e);
+                    client.handleKeyEvent(e);
                 }
             }
         });
@@ -178,9 +178,9 @@ public class VernacularViewer extends JFrame {
             setMenuState(false);
         });
         config.setPasswordSupplier(this::showPasswordDialog);
-        config.setFramebufferUpdateListener(this::renderFrame);
+        config.setScreenUpdateListener(this::renderFrame);
         config.setBellListener(v -> getDefaultToolkit().beep());
-        config.setServerCutTextListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
+        config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         client = new VernacularClient(config);
     }
 

@@ -13,9 +13,9 @@ public class VernacularConfig {
 
     private Supplier<String> passwordSupplier;
     private Consumer<VncException> errorListener;
-    private Consumer<Image> framebufferUpdateListener;
+    private Consumer<Image> screenUpdateListener;
     private Consumer<Void> bellListener;
-    private Consumer<String> serverCutTextListener;
+    private Consumer<String> remoteClipboardListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8_INDEXED;
@@ -26,7 +26,6 @@ public class VernacularConfig {
 
     /**
      * Specifies a Supplier which will be called to find the VNC password if the remote host requires authentication.
-     * Most implementations will prompt the user to enter their password and return it immediately
      *
      * @param passwordSupplier A Supplier which when invoked will return the user's VNC password
      */
@@ -39,8 +38,7 @@ public class VernacularConfig {
     }
 
     /**
-     * Specifies a Consumer which will be passed a reference to any Exception which occurs during execution of the
-     * VNC client. Most implementations will handle the exception by displaying a graphical error message to the user.
+     * Specifies a Consumer which will be passed any Exception which occurs during execution of the VNC client.
      *
      * @param errorListener A Consumer which will receive any Exceptions which occur during the VNC session
      */
@@ -48,31 +46,65 @@ public class VernacularConfig {
         this.errorListener = errorListener;
     }
 
+    @Deprecated
     public Consumer<Image> getFramebufferUpdateListener() {
-        return framebufferUpdateListener;
+        return getScreenUpdateListener();
     }
 
     /**
-     * Specifies a Consumer which will be passed a java.awt.Image representing the remote server's desktop every time
-     * we receive a framebuffer update. Most implementations will simply display the updated image on screen.
+     * Specifies a Consumer which will be passed an Image representing the remote server's desktop every time
+     * we receive a framebuffer update.
      *
      * @param framebufferUpdateListener A Consumer which will receive Images representing the updated remote desktop
+     * @see java.awt.Image Image
+     * @deprecated See {@link #setScreenUpdateListener(Consumer)} ()}
      */
+    @Deprecated
     public void setFramebufferUpdateListener(Consumer<Image> framebufferUpdateListener) {
-        this.framebufferUpdateListener = framebufferUpdateListener;
+        setScreenUpdateListener(framebufferUpdateListener);
+    }
+
+    public Consumer<Image> getScreenUpdateListener() {
+        return screenUpdateListener;
+    }
+
+    /**
+     * Specifies a Consumer which will be passed an Image representing the remote server's desktop every time
+     * we receive a screen update.
+     *
+     * @param screenUpdateListener A Consumer which will receive Images representing the updated remote desktop
+     * @see java.awt.Image Image
+     */
+    public void setScreenUpdateListener(Consumer<Image> screenUpdateListener) {
+        this.screenUpdateListener = screenUpdateListener;
     }
 
     public Consumer<String> getServerCutTextListener() {
-        return serverCutTextListener;
+        return getRemoteClipboardListener();
     }
 
     /**
      * Specifies a Consumer which will be invoked when the sever wants to store text in the clipboard
      *
-     * @param serverCutTextListener  A Consumer which will be invoked when the sever wants to store text in the clipboard
+     * @param remoteClipboardListener A Consumer which will be invoked when the sever wants to store text in the clipboard
+     * @deprecated See {@link #setRemoteClipboardListener(Consumer)}
      */
-    public void setServerCutTextListener(Consumer<String> serverCutTextListener) {
-        this.serverCutTextListener = serverCutTextListener;
+    @Deprecated
+    public void setServerCutTextListener(Consumer<String> remoteClipboardListener) {
+        setRemoteClipboardListener(remoteClipboardListener);
+    }
+
+    public Consumer<String> getRemoteClipboardListener() {
+        return remoteClipboardListener;
+    }
+
+    /**
+     * Specifies a Consumer which will be invoked when the sever wants to store text in the clipboard
+     *
+     * @param remoteClipboardListener A Consumer which will be invoked when the sever wants to store text in the clipboard
+     */
+    public void setRemoteClipboardListener(Consumer<String> remoteClipboardListener) {
+        this.remoteClipboardListener = remoteClipboardListener;
     }
 
     public Consumer<Void> getBellListener() {
@@ -93,9 +125,10 @@ public class VernacularConfig {
     }
 
     /**
-     * Specifies whether we should request 'shared' access to the remote server. If this is set to false, most servers
-     * will disconnect any other clients as soon as we connect.
-     *
+     * Specifies whether we should request 'shared' access to the remote server.
+     * <p>
+     * If this is set to false, most servers will disconnect any other clients as soon as we connect.
+     * <p>
      * Default: true
      *
      * @param shared Should we request shared access to the remote server?
@@ -109,10 +142,11 @@ public class VernacularConfig {
     }
 
     /**
-     * Sets the target number of frames per second we wish to receive from the remote server. Note that this is the
-     * maximum number of framebuffer updates we will request per second. The server does not have to honour our
-     * requests. The higher the number of frames per second, the more bandwidth we will consume.
-     *
+     * Sets the target number of frames per second we wish to receive from the remote server.
+     * <p>
+     * Note that this is the maximum number of framebuffer updates we will request per second. The server does not have
+     * to honour our requests. The higher the number of frames per second, the more bandwidth we will consume.
+     * <p>
      * Default: 30
      *
      * @param targetFramesPerSecond The number of frames per second we want to receive from the remote server
@@ -128,12 +162,11 @@ public class VernacularConfig {
     /**
      * Specifies the color depth to request from the remote server. Note that the greater the color depth, the more
      * bandwidth we will consume.
-     *
+     * <p>
      * Default: 8 bits per pixel
      *
-     * @see com.shinyhut.vernacular.client.rendering.ColorDepth ColorDepth
-     *
      * @param colorDepth The color depth for rendering the remote desktop
+     * @see com.shinyhut.vernacular.client.rendering.ColorDepth ColorDepth
      */
     public void setColorDepth(ColorDepth colorDepth) {
         this.colorDepth = colorDepth;

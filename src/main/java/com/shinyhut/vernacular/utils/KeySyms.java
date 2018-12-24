@@ -128,4 +128,8 @@ public class KeySyms {
         }
         return Optional.empty();
     }
+
+    public static Optional<Integer> forKeyCode(int keyCode) {
+        return Optional.ofNullable(KEYCODES.get(keyCode));
+    }
 }

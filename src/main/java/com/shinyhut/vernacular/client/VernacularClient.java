@@ -13,9 +13,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.stream.IntStream;
 
-import static java.awt.event.KeyEvent.KEY_PRESSED;
-import static java.awt.event.KeyEvent.KEY_RELEASED;
-import static java.awt.event.KeyEvent.KEY_TYPED;
+import static java.awt.event.KeyEvent.*;
 import static java.util.stream.IntStream.range;
 
 public class VernacularClient {
@@ -221,7 +219,8 @@ public class VernacularClient {
      * 'Types' (presses and releases) the key representing each character in the specified string, in order.
      * <p>
      * Note that this is only guaranteed to work as expected for strings containing only printable ASCII characters -
-     * apart from line breaks, which are converted into ENTER key presses.
+     * apart from line breaks, which are converted to ENTER key presses, and tabs, which are converted to TAB key
+     * presses.
      *
      * @param text The text that will be typed on the remote server
      */
@@ -229,7 +228,16 @@ public class VernacularClient {
         text = text.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
         range(0, text.length())
                 .map(text::charAt)
-                .map(c -> c == '\n' ? 0xff0d : c == '\t' ? 0xff09 : c)
+                .map(c -> {
+                    switch (c) {
+                        case '\n':
+                            return KeySyms.forKeyCode(VK_ENTER).get();
+                        case '\t':
+                            return KeySyms.forKeyCode(VK_TAB).get();
+                        default:
+                            return c;
+                    }
+                })
                 .forEach(this::type);
     }
 

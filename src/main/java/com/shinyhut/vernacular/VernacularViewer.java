@@ -55,16 +55,20 @@ public class VernacularViewer extends JFrame {
         }
     };
 
+    private volatile boolean shutdown = false;
+
     private Thread clipboardMonitor = new Thread(() -> {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         String lastText = null;
-        while (running()) {
+        while (!shutdown) {
             try {
-                String text = (String) clipboard.getData(stringFlavor);
-                if (text != null && !text.equals(lastText)) {
-                    client.copyText(text);
-                    lastText = text;
+                if (connected()) {
+                    String text = (String) clipboard.getData(stringFlavor);
+                    if (text != null && !text.equals(lastText)) {
+                        client.copyText(text);
+                        lastText = text;
+                    }
                 }
                 sleep(100L);
             } catch (Exception ignored) {
@@ -85,6 +89,11 @@ public class VernacularViewer extends JFrame {
             @Override
             public void windowClosing(WindowEvent event) {
                 disconnect();
+                shutdown = true;
+                try {
+                    clipboardMonitor.join();
+                } catch (InterruptedException ignored) {
+                }
                 super.windowClosing(event);
             }
         });
@@ -94,6 +103,7 @@ public class VernacularViewer extends JFrame {
         addKeyListener();
         addDrawingSurface();
         initialiseVernacularClient();
+        clipboardMonitor.start();
     }
 
     private void addKeyListener() {
@@ -101,14 +111,14 @@ public class VernacularViewer extends JFrame {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (running()) {
+                if (connected()) {
                     client.keyPress(e);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (running()) {
+                if (connected()) {
                     client.keyPress(e);
                 }
             }
@@ -124,7 +134,7 @@ public class VernacularViewer extends JFrame {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (running()) {
+                if (connected()) {
                     client.moveMouse(scaleMouseX(e.getX()), scaleMouseY(e.getY()));
                 }
             }
@@ -132,14 +142,14 @@ public class VernacularViewer extends JFrame {
         getContentPane().addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (running()) {
+                if (connected()) {
                     client.updateMouseButton(e.getButton() - 1, true);
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (running()) {
+                if (connected()) {
                     client.updateMouseButton(e.getButton() - 1, false);
                 }
             }
@@ -267,16 +277,11 @@ public class VernacularViewer extends JFrame {
         setMenuState(true);
         lastFrame = null;
         client.start(host, port);
-        clipboardMonitor.start();
     }
 
     private void disconnect() {
-        if (running()) {
+        if (connected()) {
             client.stop();
-            try {
-                clipboardMonitor.join();
-            } catch (InterruptedException ignored) {
-            }
         }
         setMenuState(false);
     }
@@ -295,7 +300,7 @@ public class VernacularViewer extends JFrame {
         }
     }
 
-    private boolean running() {
+    private boolean connected() {
         return client != null && client.isRunning();
     }
 

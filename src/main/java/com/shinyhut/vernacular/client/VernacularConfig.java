@@ -38,7 +38,7 @@ public class VernacularConfig {
     }
 
     /**
-     * Specifies a Consumer which will be passed any Exception which occurs during execution of the VNC client.
+     * Specifies a Consumer which will be passed any Exception which occurs during the VNC session.
      *
      * @param errorListener A Consumer which will receive any Exceptions which occur during the VNC session
      */
@@ -53,7 +53,7 @@ public class VernacularConfig {
 
     /**
      * Specifies a Consumer which will be passed an Image representing the remote server's desktop every time
-     * we receive a framebuffer update.
+     * we receive a screen update.
      *
      * @param framebufferUpdateListener A Consumer which will receive Images representing the updated remote desktop
      * @see java.awt.Image Image

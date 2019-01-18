@@ -1,8 +1,6 @@
 package com.shinyhut.vernacular.protocol.messages;
 
 import com.shinyhut.vernacular.client.exceptions.UnsupportedEncodingException;
-import com.shinyhut.vernacular.client.rendering.renderers.HextileRenderer;
-import com.shinyhut.vernacular.utils.ByteUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

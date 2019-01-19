@@ -46,24 +46,6 @@ public class VernacularConfig {
         this.errorListener = errorListener;
     }
 
-    @Deprecated
-    public Consumer<Image> getFramebufferUpdateListener() {
-        return getScreenUpdateListener();
-    }
-
-    /**
-     * Specifies a Consumer which will be passed an Image representing the remote server's desktop every time
-     * we receive a screen update.
-     *
-     * @param framebufferUpdateListener A Consumer which will receive Images representing the updated remote desktop
-     * @see java.awt.Image Image
-     * @deprecated See {@link #setScreenUpdateListener(Consumer)} ()}
-     */
-    @Deprecated
-    public void setFramebufferUpdateListener(Consumer<Image> framebufferUpdateListener) {
-        setScreenUpdateListener(framebufferUpdateListener);
-    }
-
     public Consumer<Image> getScreenUpdateListener() {
         return screenUpdateListener;
     }
@@ -77,21 +59,6 @@ public class VernacularConfig {
      */
     public void setScreenUpdateListener(Consumer<Image> screenUpdateListener) {
         this.screenUpdateListener = screenUpdateListener;
-    }
-
-    public Consumer<String> getServerCutTextListener() {
-        return getRemoteClipboardListener();
-    }
-
-    /**
-     * Specifies a Consumer which will be invoked when the sever wants to store text in the clipboard
-     *
-     * @param remoteClipboardListener A Consumer which will be invoked when the sever wants to store text in the clipboard
-     * @deprecated See {@link #setRemoteClipboardListener(Consumer)}
-     */
-    @Deprecated
-    public void setServerCutTextListener(Consumer<String> remoteClipboardListener) {
-        setRemoteClipboardListener(remoteClipboardListener);
     }
 
     public Consumer<String> getRemoteClipboardListener() {

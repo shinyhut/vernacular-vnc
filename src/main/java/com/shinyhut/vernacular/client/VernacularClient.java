@@ -134,20 +134,6 @@ public class VernacularClient {
     }
 
     /**
-     * Updates the status (pressed or not pressed) of the key represented by the specified KeyEvent
-     *
-     * @param event The KeyEvent for this key press or release
-     * @see java.awt.event.KeyEvent KeyEvent
-     * @deprecated See {@link #handleKeyEvent(KeyEvent)}
-     */
-    @Deprecated
-    public void keyPress(KeyEvent event) {
-        if (event.getID() == KEY_PRESSED || event.getID() == KEY_RELEASED) {
-            KeySyms.forEvent(event).ifPresent(k -> keyPress(k, event.getID() == KEY_PRESSED));
-        }
-    }
-
-    /**
      * Presses, releases or 'types' the key represented by the specified KeyEvent.
      * <p>
      * The event type should be one of KEY_PRESSED, KEY_RELEASED or KEY_TYPED. All other event types are ignored.
@@ -167,20 +153,6 @@ public class VernacularClient {
                     break;
             }
         });
-    }
-
-    /**
-     * Updates the status (pressed or not pressed) of the key represented by the specified KeySym
-     * <p>
-     * For a complete list of KeySyms, see https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
-     *
-     * @param keySym  The KeySym for this key press or release
-     * @param pressed Was the key pressed (true) or released (false)?
-     * @deprecated See {@link #updateKey(int, boolean)}
-     */
-    @Deprecated
-    public void keyPress(int keySym, boolean pressed) {
-        updateKey(keySym, pressed);
     }
 
     /**

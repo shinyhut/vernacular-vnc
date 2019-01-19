@@ -57,7 +57,7 @@ public class ServerEventHandler {
                             break;
                         case 0x03:
                             ServerCutText cutText = ServerCutText.decode(in);
-                            Consumer<String> cutTextListener = session.getConfig().getServerCutTextListener();
+                            Consumer<String> cutTextListener = session.getConfig().getRemoteClipboardListener();
                             if (cutTextListener != null) {
                                 cutTextListener.accept(cutText.getText());
                             }

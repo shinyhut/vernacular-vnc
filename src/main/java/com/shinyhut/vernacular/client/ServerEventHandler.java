@@ -41,7 +41,7 @@ public class ServerEventHandler {
 
                     switch (messageType) {
                         case 0x00:
-                            FramebufferUpdate framebufferUpdate = FramebufferUpdate.decode(in, session.getPixelFormat().getBitsPerPixel());
+                            FramebufferUpdate framebufferUpdate = FramebufferUpdate.decode(in);
                             framebuffer.processUpdate(framebufferUpdate);
                             break;
                         case 0x01:

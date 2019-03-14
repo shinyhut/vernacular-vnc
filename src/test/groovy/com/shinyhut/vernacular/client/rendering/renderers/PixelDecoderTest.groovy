@@ -11,9 +11,10 @@ class PixelDecoderTest extends Specification {
         def decoder = new PixelDecoder([:])
         def pixelFormat = new PixelFormat(16, 16, true, true, 31, 63, 31, 11, 5, 0)
         def pixel = [0xff, 0xff] as byte[]
+        def input = new ByteArrayInputStream(pixel)
 
         when:
-        def result = decoder.decode(pixel, pixelFormat)
+        def result = decoder.decode(input, pixelFormat)
 
         then:
         result.red == 255
@@ -27,9 +28,10 @@ class PixelDecoderTest extends Specification {
         def pixel = [1] as byte[]
         def colorMap = [(1 as BigInteger): new ColorMapEntry(1000, 2000, 3000)]
         def decoder = new PixelDecoder(colorMap)
+        def input = new ByteArrayInputStream(pixel)
 
         when:
-        def result = decoder.decode(pixel, pixelFormat)
+        def result = decoder.decode(input, pixelFormat)
 
         then:
         result.red == 4

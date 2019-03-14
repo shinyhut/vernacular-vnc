@@ -1,12 +1,14 @@
 package com.shinyhut.vernacular.client.rendering.renderers;
 
+import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
+import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
-import static java.lang.System.arraycopy;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class RawRenderer implements Renderer {
 
@@ -19,25 +21,25 @@ public class RawRenderer implements Renderer {
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle) {
-        render(destination, rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getPixelData());
+    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
+        render(in, destination, rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
     }
 
-    public void render(BufferedImage destination, int x, int y, int width, byte[] pixelData) {
-
-        int sx = x;
-        int sy = y;
-
-        for (int i = 0; i <= pixelData.length - pixelFormat.getBytesPerPixel(); i += pixelFormat.getBytesPerPixel()) {
-            byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
-            arraycopy(pixelData, i, bytes, 0, bytes.length);
-            Pixel pixel = pixelDecoder.decode(bytes, pixelFormat);
-            destination.setRGB(sx, sy, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
-            sx++;
-            if (sx == x + width) {
-                sx = x;
-                sy++;
+    void render(InputStream in, BufferedImage destination, int x, int y, int width, int height) throws VncException {
+        try {
+            int sx = x;
+            int sy = y;
+            for (int i = 0; i < width * height * pixelFormat.getBytesPerPixel(); i++) {
+                Pixel pixel = pixelDecoder.decode(in, pixelFormat);
+                destination.setRGB(sx, sy, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
+                sx++;
+                if (sx == x + width) {
+                    sx = x;
+                    sy++;
+                }
             }
+        } catch (IOException e) {
+            throw new UnexpectedVncException(e);
         }
     }
 

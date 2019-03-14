@@ -1,6 +1,7 @@
 package com.shinyhut.vernacular.client.rendering;
 
 import com.shinyhut.vernacular.client.VncSession;
+import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.renderers.*;
 import com.shinyhut.vernacular.protocol.messages.*;
@@ -8,6 +9,8 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,14 +43,20 @@ public class Framebuffer {
 
     public void processUpdate(FramebufferUpdate update) throws VncException {
         session.setLastFramebufferUpdateTime(now());
-        for (Rectangle rectangle : update.getRectangles()) {
-            if (rectangle.getEncoding() == DESKTOP_SIZE) {
-                resizeFramebuffer(rectangle);
-            } else {
-                renderers.get(rectangle.getEncoding()).render(frame, rectangle);
+        InputStream in = session.getInputStream();
+        try {
+            for (int i = 0; i < update.getNumberOfRectangles(); i++) {
+                Rectangle rectangle = Rectangle.decode(in);
+                if (rectangle.getEncoding() == DESKTOP_SIZE) {
+                    resizeFramebuffer(rectangle);
+                } else {
+                    renderers.get(rectangle.getEncoding()).render(in, frame, rectangle);
+                }
             }
+            paint();
+        } catch (IOException e) {
+            throw new UnexpectedVncException(e);
         }
-        paint();
     }
 
     private void paint() {

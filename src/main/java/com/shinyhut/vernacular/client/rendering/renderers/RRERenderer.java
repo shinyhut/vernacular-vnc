@@ -7,10 +7,10 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class RRERenderer implements Renderer {
 
@@ -23,31 +23,22 @@ public class RRERenderer implements Renderer {
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle) throws VncException {
-
-        byte[] pixelData = rectangle.getPixelData();
-
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(pixelData));
-
+    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
         try {
+            DataInput dataInput = new DataInputStream(in);
             int numberOfSubrectangles = dataInput.readInt();
-            byte[] bgColorBytes = new byte[pixelFormat.getBytesPerPixel()];
-            dataInput.readFully(bgColorBytes);
-            Pixel bgColor = pixelDecoder.decode(bgColorBytes, pixelFormat);
+            Pixel bgColor = pixelDecoder.decode(in, pixelFormat);
 
             Graphics2D graphic = (Graphics2D) destination.getGraphics();
-
             graphic.setColor(new Color(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()));
             graphic.fillRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
 
             for (int i = 0; i < numberOfSubrectangles; i++) {
-                byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
-                dataInput.readFully(bytes);
+                Pixel color = pixelDecoder.decode(in, pixelFormat);
                 int x = dataInput.readUnsignedShort();
                 int y = dataInput.readUnsignedShort();
                 int width = dataInput.readUnsignedShort();
                 int height = dataInput.readUnsignedShort();
-                Pixel color = pixelDecoder.decode(bytes, pixelFormat);
                 graphic.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
                 graphic.fillRect(x + rectangle.getX(), y + rectangle.getY(), width, height);
             }

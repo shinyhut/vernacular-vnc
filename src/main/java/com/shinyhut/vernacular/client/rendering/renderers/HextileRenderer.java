@@ -7,20 +7,20 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.Optional;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.shinyhut.vernacular.utils.ByteUtils.mask;
-import static java.lang.Math.ceil;
-import static java.util.Optional.empty;
 
 public class HextileRenderer implements Renderer {
 
-    public static final int SUB_ENCODING_MASK_RAW = 0x01;
-    public static final int SUB_ENCODING_MASK_BACKGROUND_SPECIFIED = 0x02;
-    public static final int SUB_ENCODING_MASK_FOREGROUND_SPECIFIED = 0x04;
-    public static final int SUB_ENCODING_MASK_ANY_SUBRECTS = 0x08;
-    public static final int SUB_ENCODING_MASK_SUBRECTS_COLORED = 0x10;
+    private static final int SUB_ENCODING_MASK_RAW = 0x01;
+    private static final int SUB_ENCODING_MASK_BACKGROUND_SPECIFIED = 0x02;
+    private static final int SUB_ENCODING_MASK_FOREGROUND_SPECIFIED = 0x04;
+    private static final int SUB_ENCODING_MASK_ANY_SUBRECTS = 0x08;
+    private static final int SUB_ENCODING_MASK_SUBRECTS_COLORED = 0x10;
 
     private static final int TILE_SIZE = 16;
 
@@ -35,103 +35,72 @@ public class HextileRenderer implements Renderer {
     }
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle) throws VncException {
-
-        InputStream in = new ByteArrayInputStream(rectangle.getPixelData());
+    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
         DataInput dataInput = new DataInputStream(in);
+        Graphics2D g = (Graphics2D) destination.getGraphics();
 
-        Graphics2D graphics = (Graphics2D) destination.getGraphics();
-
-        int horizontalTiles = (int) ceil((double) rectangle.getWidth() / TILE_SIZE);
-        int verticalTiles = (int) ceil((double) rectangle.getHeight() / TILE_SIZE);
+        int horizontalTileCount = (rectangle.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
+        int verticalTileCount = (rectangle.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
 
         Pixel lastBackground = null;
         Pixel lastForeground = null;
 
-        for (int ty = 0; ty < verticalTiles; ty++) {
-            for (int tx = 0; tx < horizontalTiles; tx++) {
-                try {
-                    int sx = rectangle.getX() + (tx * TILE_SIZE);
-                    int sy = rectangle.getY() + (ty * TILE_SIZE);
-                    int width = tileSize(tx, horizontalTiles, rectangle.getWidth());
-                    int height = tileSize(ty, verticalTiles, rectangle.getHeight());
+        try {
+            for (int tileY = 0; tileY < verticalTileCount; tileY++) {
+                for (int tileX = 0; tileX < horizontalTileCount; tileX++) {
+                    int tileTopLeftX = rectangle.getX() + (tileX * TILE_SIZE);
+                    int tileTopLeftY = rectangle.getY() + (tileY * TILE_SIZE);
+                    int tileWidth = tileSize(tileX, horizontalTileCount, rectangle.getWidth());
+                    int tileHeight = tileSize(tileY, verticalTileCount, rectangle.getHeight());
                     int subencoding = dataInput.readUnsignedByte();
                     boolean raw = mask(subencoding, SUB_ENCODING_MASK_RAW);
 
                     if (raw) {
-                        drawRawTile(destination, dataInput, sx, sy, width, height);
+                        rawRenderer.render(in, destination, tileTopLeftX, tileTopLeftY, tileWidth, tileHeight);
                     } else {
-                        Pixel background = backgroundColor(in, subencoding).orElse(lastBackground);
-                        Pixel foreground = foregroundColor(in, subencoding).orElse(lastForeground);
+                        boolean hasBackground = mask(subencoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
+                        boolean hasForeground = mask(subencoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
+                        boolean hasSubrects = mask(subencoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
+                        boolean subrectsColored = mask(subencoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
+
+                        Pixel background = hasBackground ? pixelDecoder.decode(in, pixelFormat) : lastBackground;
+                        Pixel foreground = hasForeground ? pixelDecoder.decode(in, pixelFormat) : lastForeground;
                         lastBackground = background;
                         lastForeground = foreground;
-                        fillRect(graphics, sx, sy, width, height, background);
 
-                        boolean anySubrects = mask(subencoding, SUB_ENCODING_MASK_ANY_SUBRECTS);
-                        if (anySubrects) {
+                        g.setColor(new Color(background.getRed(), background.getGreen(), background.getBlue()));
+                        g.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight);
+
+                        if (hasSubrects) {
                             int subrectCount = dataInput.readUnsignedByte();
                             for (int s = 0; s < subrectCount; s++) {
-                                renderSubrectangle(in, dataInput, graphics, sx, sy, subencoding, foreground);
+                                Pixel subrectColor = subrectsColored ? pixelDecoder.decode(in, pixelFormat) : foreground;
+                                int coords = dataInput.readUnsignedByte();
+                                int dimensions = dataInput.readUnsignedByte();
+                                int subrectX = coords >> 4;
+                                int subrectY = coords & 0x0f;
+                                int subrectWidth = (dimensions >> 4) + 1;
+                                int subrectHeight = (dimensions & 0x0f) + 1;
+                                int subrectTopLeftX = tileTopLeftX + subrectX;
+                                int subrectTopLeftY = tileTopLeftY + subrectY;
+                                g.setColor(new Color(subrectColor.getRed(), subrectColor.getGreen(), subrectColor.getBlue()));
+                                g.fillRect(subrectTopLeftX, subrectTopLeftY, subrectWidth, subrectHeight);
                             }
                         }
                     }
-                } catch (IOException e) {
-                    throw new UnexpectedVncException(e);
+
                 }
             }
+        } catch (IOException e) {
+            throw new UnexpectedVncException(e);
         }
     }
 
-    public static int tileSize(int tileNo, int tileCount, int rectangleSize) {
-        return tileNo == tileCount - 1 && rectangleSize % TILE_SIZE != 0 ? rectangleSize % TILE_SIZE : TILE_SIZE;
-    }
-
-    private void drawRawTile(BufferedImage img, DataInput in, int x, int y, int width, int height) throws IOException {
-        byte[] pixelData = new byte[width * height * pixelFormat.getBytesPerPixel()];
-        in.readFully(pixelData);
-        rawRenderer.render(img, x, y, width, pixelData);
-    }
-
-    private void renderSubrectangle(InputStream in, DataInput dataInput, Graphics2D graphics, int x, int y,
-                                    int subencoding, Pixel foreground) throws IOException {
-
-        Pixel color = subrectangleColor(in, subencoding).orElse(foreground);
-        int coords = dataInput.readUnsignedByte();
-        int dimensions = dataInput.readUnsignedByte();
-        int subrectX = coords >> 4;
-        int subrectY = coords & 0x0f;
-        int width = (dimensions >> 4) + 1;
-        int height = (dimensions & 0x0f) + 1;
-        int sx = x + subrectX;
-        int sy = y + subrectY;
-        fillRect(graphics, sx, sy, width, height, color);
-    }
-
-    private void fillRect(Graphics2D g, int x, int y, int width, int height, Pixel color) {
-        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
-        g.fillRect(x, y, width, height);
-    }
-
-    private Optional<Pixel> backgroundColor(InputStream in, int subencoding) throws IOException {
-        return optionalPixel(in, subencoding, SUB_ENCODING_MASK_BACKGROUND_SPECIFIED);
-    }
-
-    private Optional<Pixel> foregroundColor(InputStream in, int subencoding) throws IOException {
-        return optionalPixel(in, subencoding, SUB_ENCODING_MASK_FOREGROUND_SPECIFIED);
-    }
-
-    private Optional<Pixel> subrectangleColor(InputStream in, int subencoding) throws IOException {
-        return optionalPixel(in, subencoding, SUB_ENCODING_MASK_SUBRECTS_COLORED);
-    }
-
-    private Optional<Pixel> optionalPixel(InputStream in, int subencoding, int mask) throws IOException {
-        Optional<Pixel> pixel;
-        if (mask(subencoding, mask)) {
-            pixel = Optional.of(pixelDecoder.decode(in, pixelFormat));
-        } else {
-            pixel = empty();
+    private static int tileSize(int tileNo, int numberOfTiles, int rectangleSize) {
+        int overlap = rectangleSize % TILE_SIZE;
+        if (tileNo == numberOfTiles -1 && overlap != 0) {
+            return overlap;
         }
-        return pixel;
+        return TILE_SIZE;
     }
-
 }

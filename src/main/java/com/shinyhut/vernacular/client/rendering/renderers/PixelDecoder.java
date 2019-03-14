@@ -25,10 +25,6 @@ public class PixelDecoder {
         DataInput dataInput = new DataInputStream(in);
         byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
         dataInput.readFully(bytes);
-        return decode(bytes, pixelFormat);
-    }
-
-    public Pixel decode(byte[] bytes, PixelFormat pixelFormat) {
         BigInteger value = new BigInteger(1, bytes);
 
         int red;

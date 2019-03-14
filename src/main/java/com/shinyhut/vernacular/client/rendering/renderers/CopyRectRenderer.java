@@ -5,19 +5,19 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 public class CopyRectRenderer implements Renderer {
 
     @Override
-    public void render(BufferedImage destination, Rectangle rectangle) throws VncException {
+    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
         try {
-            DataInput dataInput = new DataInputStream(new ByteArrayInputStream(rectangle.getPixelData()));
+            DataInput dataInput = new DataInputStream(in);
             int srcX = dataInput.readUnsignedShort();
             int srcY = dataInput.readUnsignedShort();
             BufferedImage src = new BufferedImage(rectangle.getWidth(), rectangle.getHeight(), TYPE_INT_RGB);

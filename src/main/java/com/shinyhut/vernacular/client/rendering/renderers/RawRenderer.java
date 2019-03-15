@@ -29,7 +29,7 @@ public class RawRenderer implements Renderer {
         try {
             int sx = x;
             int sy = y;
-            for (int i = 0; i < width * height * pixelFormat.getBytesPerPixel(); i++) {
+            for (int i = 0; i < width * height; i++) {
                 Pixel pixel = pixelDecoder.decode(in, pixelFormat);
                 destination.setRGB(sx, sy, new Color(pixel.getRed(), pixel.getGreen(), pixel.getBlue()).getRGB());
                 sx++;

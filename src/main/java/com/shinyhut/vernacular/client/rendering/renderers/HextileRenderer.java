@@ -7,6 +7,7 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class HextileRenderer implements Renderer {
                     int tileTopLeftY = rectangle.getY() + (tileY * TILE_SIZE);
                     int tileWidth = tileSize(tileX, horizontalTileCount, rectangle.getWidth());
                     int tileHeight = tileSize(tileY, verticalTileCount, rectangle.getHeight());
-                    int subencoding = dataInput.readUnsignedByte();
+                    int subencoding = in.read();
                     boolean raw = mask(subencoding, SUB_ENCODING_MASK_RAW);
 
                     if (raw) {
@@ -72,11 +73,15 @@ public class HextileRenderer implements Renderer {
                         g.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight);
 
                         if (hasSubrects) {
-                            int subrectCount = dataInput.readUnsignedByte();
+                            int subrectCount = in.read();
+                            int subrectDataLength = subrectCount * (subrectsColored ? pixelFormat.getBytesPerPixel() + 2 : 2);
+                            byte[] subrectBytes = new byte[subrectDataLength];
+                            dataInput.readFully(subrectBytes);
+                            ByteArrayInputStream subrectInput = new ByteArrayInputStream(subrectBytes);
                             for (int s = 0; s < subrectCount; s++) {
-                                Pixel subrectColor = subrectsColored ? pixelDecoder.decode(in, pixelFormat) : foreground;
-                                int coords = dataInput.readUnsignedByte();
-                                int dimensions = dataInput.readUnsignedByte();
+                                Pixel subrectColor = subrectsColored ? pixelDecoder.decode(subrectInput, pixelFormat) : foreground;
+                                int coords = subrectInput.read();
+                                int dimensions = subrectInput.read();
                                 int subrectX = coords >> 4;
                                 int subrectY = coords & 0x0f;
                                 int subrectWidth = (dimensions >> 4) + 1;

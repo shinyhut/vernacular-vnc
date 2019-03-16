@@ -69,7 +69,7 @@ public class ClientEventHandler {
     }
 
     void updateMouseButton(int button, boolean pressed) throws IOException {
-        buttons.set(button, pressed);
+        buttons.set(button - 1, pressed);
         updateMouseStatus();
     }
 

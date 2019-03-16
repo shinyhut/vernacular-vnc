@@ -143,14 +143,27 @@ public class VernacularViewer extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (connected()) {
-                    client.updateMouseButton(e.getButton() - 1, true);
+                    client.updateMouseButton(e.getButton(), true);
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (connected()) {
-                    client.updateMouseButton(e.getButton() - 1, false);
+                    client.updateMouseButton(e.getButton(), false);
+                }
+            }
+        });
+        getContentPane().addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (connected()) {
+                    int notches = e.getWheelRotation();
+                    if (notches < 0) {
+                        client.scrollUp();
+                    } else {
+                        client.scrollDown();
+                    }
                 }
             }
         });

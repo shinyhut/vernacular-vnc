@@ -106,8 +106,12 @@ public class VernacularClient {
      * <p>
      * To indicate a mouse 'click', call this method twice in quick succession, first with pressed = true,
      * then with pressed = false, or use the convenience {@link #click(int)} method.
+     * <p>
+     * On a conventional mouse, buttons 1, 2, and 3 correspond to the left, middle, and right buttons on the mouse.
+     * On a wheel mouse, each step of the wheel upwards is represented by a press and release of button 4, and each step
+     * downwards is represented by a press and release of button 5.
      *
-     * @param button  The mouse button number (1-3)
+     * @param button  The mouse button number (1-8)
      * @param pressed Is the mouse button currently 'pressed'?
      */
     public void updateMouseButton(int button, boolean pressed) {
@@ -126,11 +130,29 @@ public class VernacularClient {
      * This is equivalent to calling {@link #updateMouseButton(int, boolean)} twice in quick succession with
      * pressed = true and pressed = false
      *
-     * @param button The mouse button number (1-3)
+     * @param button The mouse button number (1-8)
      */
     public void click(int button) {
         updateMouseButton(button, true);
         updateMouseButton(button, false);
+    }
+
+    /**
+     * Scroll up using the mouse wheel.
+     * <p>
+     * This is equivalent to calling {@link #click(int)} with button number 4
+     */
+    public void scrollUp() {
+        click(4);
+    }
+
+    /**
+     * Scroll down using the mouse wheel.
+     * <p>
+     * This is equivalent to calling {@link #click(int)} with button number 5
+     */
+    public void scrollDown() {
+        click(5);
     }
 
     /**

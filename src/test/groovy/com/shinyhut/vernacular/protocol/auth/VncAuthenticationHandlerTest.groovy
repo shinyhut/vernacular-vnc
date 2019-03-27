@@ -27,12 +27,16 @@ class VncAuthenticationHandlerTest extends Specification {
         def challenge = [
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10
-        ] as byte[]
+        ]
 
-        def session = new VncSession('host', 0, config, new ByteArrayInputStream(challenge), new ByteArrayOutputStream())
+        def response = [0x00, 0x00, 0x00, 0x00]
+
+        def input = new ByteArrayInputStream((challenge + response) as byte[])
+
+        def session = new VncSession('host', 0, config, input, new ByteArrayOutputStream())
 
         when:
-        handler.authenticate(session)
+        def result = handler.authenticate(session)
 
         then:
         def output = ((ByteArrayOutputStream) session.outputStream).toByteArray() as List
@@ -42,6 +46,8 @@ class VncAuthenticationHandlerTest extends Specification {
                 0xab, 0xd2, 0x63, 0x95, 0xc6, 0xfb, 0x36, 0xaf,
                 0x42, 0x13, 0x13, 0x33, 0x96, 0xe3, 0x81, 0xc4
         ] as byte[]
+
+        result.success
     }
 
     def "should throw an exception if no password supplier was provided"() {

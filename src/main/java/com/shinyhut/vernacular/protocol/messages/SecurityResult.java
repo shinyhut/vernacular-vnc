@@ -1,7 +1,5 @@
 package com.shinyhut.vernacular.protocol.messages;
 
-import com.shinyhut.vernacular.client.exceptions.AuthenticationFailedException;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +9,7 @@ public class SecurityResult {
     private final boolean success;
     private final String errorMessage;
 
-    private SecurityResult(boolean success) {
+    public SecurityResult(boolean success) {
         this(success, null);
     }
 
@@ -28,13 +26,17 @@ public class SecurityResult {
         return errorMessage;
     }
 
-    public static SecurityResult decode(InputStream in) throws AuthenticationFailedException, IOException {
+    public static SecurityResult decode(InputStream in, ProtocolVersion version) throws IOException {
         DataInputStream dataInput = new DataInputStream(in);
         int resultCode = dataInput.readInt();
         SecurityResult result;
         if (resultCode == 1) {
-            ErrorMessage errorMessage = ErrorMessage.decode(in);
-            result = new SecurityResult(false, errorMessage.getMessage());
+            if (version.getMajor() == 3 && version.getMinor() == 8) {
+                ErrorMessage errorMessage = ErrorMessage.decode(in);
+                result = new SecurityResult(false, errorMessage.getMessage());
+            } else {
+                result = new SecurityResult(false);
+            }
         } else {
             result = new SecurityResult(true);
         }

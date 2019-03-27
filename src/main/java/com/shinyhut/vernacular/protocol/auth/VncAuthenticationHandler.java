@@ -4,6 +4,7 @@ import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.AuthenticationRequiredException;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
+import com.shinyhut.vernacular.protocol.messages.SecurityResult;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -24,7 +25,7 @@ public class VncAuthenticationHandler implements SecurityHandler {
     private static final byte VNC_AUTHENTICATION_TYPE = 0x02;
 
     @Override
-    public void authenticate(VncSession session) throws VncException, IOException {
+    public SecurityResult authenticate(VncSession session) throws VncException, IOException {
         Supplier<String> passwordSupplier = session.getConfig().getPasswordSupplier();
 
         if (passwordSupplier == null) {
@@ -41,6 +42,8 @@ public class VncAuthenticationHandler implements SecurityHandler {
         } catch (GeneralSecurityException e) {
             throw new UnexpectedVncException(e);
         }
+
+        return SecurityResult.decode(in, session.getProtocolVersion());
     }
 
     private static void requestVncAuthentication(OutputStream out) throws IOException {

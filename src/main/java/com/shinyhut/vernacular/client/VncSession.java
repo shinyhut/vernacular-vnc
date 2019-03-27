@@ -1,6 +1,7 @@
 package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
+import com.shinyhut.vernacular.protocol.messages.ProtocolVersion;
 import com.shinyhut.vernacular.protocol.messages.ServerInit;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class VncSession {
     private final InputStream inputStream;
     private final OutputStream outputStream;
 
+    private ProtocolVersion protocolVersion;
     private ServerInit serverInit;
     private PixelFormat pixelFormat;
 
@@ -44,6 +46,14 @@ public class VncSession {
 
     public VernacularConfig getConfig() {
         return config;
+    }
+
+    public ProtocolVersion getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(ProtocolVersion protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     public ServerInit getServerInit() {

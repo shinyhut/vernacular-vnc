@@ -22,11 +22,14 @@ public class Handshaker {
         protocolVersionNegotiator.negotiate(session);
 
         SecurityHandler securityHandler = securityTypeNegotiator.negotiate(session);
-        securityHandler.authenticate(session);
-        SecurityResult securityResult = SecurityResult.decode(session.getInputStream());
+        SecurityResult securityResult = securityHandler.authenticate(session);
 
         if (!securityResult.isSuccess()) {
-            throw new AuthenticationFailedException(securityResult.getErrorMessage());
+            if (securityResult.getErrorMessage() != null) {
+                throw new AuthenticationFailedException(securityResult.getErrorMessage());
+            } else {
+                throw new AuthenticationFailedException();
+            }
         }
     }
 }

@@ -7,22 +7,36 @@ import com.shinyhut.vernacular.protocol.messages.ProtocolVersion;
 
 import java.io.IOException;
 
+import static java.lang.Math.min;
+
 public class ProtocolVersionNegotiator {
 
-    private static final int MIN_MAJOR_VERSION = 3;
-    private static final int MIN_MINOR_VERSION = 8;
+    private static final int MAJOR_VERSION = 3;
+    private static final int MIN_MINOR_VERSION = 7;
+    private static final int MAX_MINOR_VERSION = 8;
 
     public void negotiate(VncSession session) throws IOException, VncException {
         ProtocolVersion serverVersion = ProtocolVersion.decode(session.getInputStream());
-        if (isSupported(serverVersion)) {
-            ProtocolVersion clientVersion = new ProtocolVersion(MIN_MAJOR_VERSION, MIN_MINOR_VERSION);
-            clientVersion.encode(session.getOutputStream());
-        } else {
-            throw new UnsupportedProtocolVersionException(serverVersion.getMajor(), serverVersion.getMinor(), MIN_MAJOR_VERSION, MIN_MINOR_VERSION);
+
+        if (!isSupported(serverVersion)) {
+            throw new UnsupportedProtocolVersionException(
+                    serverVersion.getMajor(),
+                    serverVersion.getMinor(),
+                    MAJOR_VERSION,
+                    MIN_MINOR_VERSION
+            );
         }
+
+        ProtocolVersion clientVersion = new ProtocolVersion(
+                MAJOR_VERSION,
+                min(serverVersion.getMinor(), MAX_MINOR_VERSION)
+        );
+
+        session.setProtocolVersion(clientVersion);
+        clientVersion.encode(session.getOutputStream());
     }
 
     private boolean isSupported(ProtocolVersion serverVersion) {
-        return serverVersion.getMajor() >= MIN_MAJOR_VERSION && serverVersion.getMinor() >= MIN_MINOR_VERSION;
+        return serverVersion.getMajor() == MAJOR_VERSION && serverVersion.getMinor() >= MIN_MINOR_VERSION;
     }
 }

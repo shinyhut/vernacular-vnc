@@ -9,6 +9,8 @@ import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -36,8 +38,7 @@ public class Framebuffer {
         renderers.put(RRE, new RRERenderer(pixelDecoder, session.getPixelFormat()));
         renderers.put(HEXTILE, new HextileRenderer(rawRenderer, pixelDecoder, session.getPixelFormat()));
 
-        this.frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
-        this.frame.setAccelerationPriority(1);
+        frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
         this.session = session;
     }
 
@@ -62,7 +63,10 @@ public class Framebuffer {
     private void paint() {
         Consumer<Image> listener = session.getConfig().getScreenUpdateListener();
         if (listener != null) {
-            listener.accept(frame);
+            ColorModel colorModel = frame.getColorModel();
+            WritableRaster raster = frame.copyData(null);
+            BufferedImage copy = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
+            listener.accept(copy);
         }
     }
 

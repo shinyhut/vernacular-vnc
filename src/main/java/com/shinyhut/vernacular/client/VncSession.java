@@ -25,7 +25,7 @@ public class VncSession {
     private int framebufferWidth;
     private int framebufferHeight;
 
-    private LocalDateTime lastFramebufferUpdateTime;
+    private volatile LocalDateTime lastFramebufferUpdateTime;
     private LocalDateTime lastFramebufferUpdateRequestTime;
 
     public VncSession(String host, int port, VernacularConfig config, InputStream inputStream, OutputStream outputStream) {

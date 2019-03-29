@@ -7,6 +7,7 @@ import com.shinyhut.vernacular.protocol.initialization.Initializer;
 import com.shinyhut.vernacular.utils.KeySyms;
 
 import java.awt.event.KeyEvent;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -260,7 +261,7 @@ public class VernacularClient {
 
     private void createSession(String host, int port) throws IOException, VncException {
         Socket socket = new Socket(host, port);
-        InputStream in = socket.getInputStream();
+        InputStream in = new BufferedInputStream(socket.getInputStream());
         OutputStream out = socket.getOutputStream();
         session = new VncSession(host, port, config, in, out);
 

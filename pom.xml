@@ -5,7 +5,7 @@
     <groupId>com.shinyhut</groupId>
     <artifactId>vernacular</artifactId>
     <packaging>jar</packaging>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
     <name>vernacular</name>
 
     <properties>

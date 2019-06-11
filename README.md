@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.shinyhut:vernacular:1.6'
+    compile 'com.shinyhut:vernacular:1.7'
 }
 ```
 

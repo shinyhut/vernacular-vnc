@@ -7,13 +7,11 @@ import com.shinyhut.vernacular.protocol.messages.ServerInit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class VncSession {
 
-    private final String host;
-    private final int port;
     private final VernacularConfig config;
     private final InputStream inputStream;
     private final OutputStream outputStream;
@@ -22,15 +20,14 @@ public class VncSession {
     private ServerInit serverInit;
     private PixelFormat pixelFormat;
 
-    private int framebufferWidth;
-    private int framebufferHeight;
+    private volatile int framebufferWidth;
+    private volatile int framebufferHeight;
 
-    private volatile LocalDateTime lastFramebufferUpdateTime;
-    private LocalDateTime lastFramebufferUpdateRequestTime;
+    private boolean receivedFramebufferUpdate = false;
+    private final ReentrantLock framebufferUpdateLock = new ReentrantLock();
+    private final Condition framebufferUpdatedCondition = framebufferUpdateLock.newCondition();
 
-    public VncSession(String host, int port, VernacularConfig config, InputStream inputStream, OutputStream outputStream) {
-        this.host = host;
-        this.port = port;
+    public VncSession(VernacularConfig config, InputStream inputStream, OutputStream outputStream) {
         this.config = config;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -72,22 +69,6 @@ public class VncSession {
         this.pixelFormat = pixelFormat;
     }
 
-    public Optional<LocalDateTime> getLastFramebufferUpdateTime() {
-        return Optional.ofNullable(lastFramebufferUpdateTime);
-    }
-
-    public void setLastFramebufferUpdateTime(LocalDateTime lastFramebufferUpdateTime) {
-        this.lastFramebufferUpdateTime = lastFramebufferUpdateTime;
-    }
-
-    public Optional<LocalDateTime> getLastFramebufferUpdateRequestTime() {
-        return Optional.ofNullable(lastFramebufferUpdateRequestTime);
-    }
-
-    public void setLastFramebufferUpdateRequestTime(LocalDateTime lastFramebufferUpdateRequestTime) {
-        this.lastFramebufferUpdateRequestTime = lastFramebufferUpdateRequestTime;
-    }
-
     public int getFramebufferWidth() {
         return framebufferWidth;
     }
@@ -102,6 +83,28 @@ public class VncSession {
 
     public void setFramebufferHeight(int framebufferHeight) {
         this.framebufferHeight = framebufferHeight;
+    }
+
+    public void waitForFramebufferUpdate() throws InterruptedException {
+        framebufferUpdateLock.lock();
+        try {
+            while (!receivedFramebufferUpdate) {
+                framebufferUpdatedCondition.await();
+            }
+            receivedFramebufferUpdate = false;
+        } finally {
+            framebufferUpdateLock.unlock();
+        }
+    }
+
+    public void framebufferUpdated() {
+        framebufferUpdateLock.lock();
+        try {
+            receivedFramebufferUpdate = true;
+            framebufferUpdatedCondition.signalAll();
+        } finally {
+            framebufferUpdateLock.unlock();
+        }
     }
 
     public void kill() {

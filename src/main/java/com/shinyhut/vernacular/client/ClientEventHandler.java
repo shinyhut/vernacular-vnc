@@ -5,12 +5,12 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import static java.lang.Thread.sleep;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.synchronizedList;
@@ -24,10 +24,12 @@ public class ClientEventHandler {
     private final ReentrantLock outputLock = new ReentrantLock(true);
 
     private volatile boolean running;
-    private Thread eventLoop;
+    private Thread framebufferUpdateLoop;
 
     private int mouseX;
     private int mouseY;
+
+    private LocalDateTime lastFramebufferUpdateRequestTime;
 
     ClientEventHandler(VncSession session, Consumer<VncException> errorHandler) {
         this.session = session;
@@ -38,31 +40,34 @@ public class ClientEventHandler {
     void start() {
         running = true;
 
-        eventLoop = new Thread(() -> {
+        framebufferUpdateLoop = new Thread(() -> {
             try {
+                boolean incremental = false;
                 while (running) {
                     if (timeForFramebufferUpdate()) {
-                        requestFramebufferUpdate();
+                        requestFramebufferUpdate(incremental);
+                        incremental = true;
+                        session.waitForFramebufferUpdate();
                     }
-                    pause();
                 }
             } catch (IOException e) {
                 if (running) {
                     errorHandler.accept(new UnexpectedVncException(e));
                 }
+            } catch (InterruptedException ignored) {
             } finally {
                 running = false;
             }
         });
 
-        eventLoop.start();
+        framebufferUpdateLoop.start();
     }
 
     void stop() {
         running = false;
         try {
-            if (eventLoop != null) {
-                eventLoop.join(1000);
+            if (framebufferUpdateLoop != null) {
+                framebufferUpdateLoop.join(1000);
             }
         } catch (InterruptedException ignored) {
         }
@@ -96,21 +101,16 @@ public class ClientEventHandler {
 
     private boolean timeForFramebufferUpdate() {
         long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
-        return session.getLastFramebufferUpdateRequestTime()
-                .map(lastUpdate -> now().isAfter(lastUpdate.plus(updateInterval, MILLIS)))
-                .orElse(true);
+        return lastFramebufferUpdateRequestTime == null ||
+                now().isAfter(lastFramebufferUpdateRequestTime.plus(updateInterval, MILLIS));
     }
 
-    private void requestFramebufferUpdate() throws IOException {
-        boolean incremental = session.getLastFramebufferUpdateTime().isPresent();
-        boolean firstRun = !session.getLastFramebufferUpdateRequestTime().isPresent();
-        if (firstRun || incremental) {
-            session.setLastFramebufferUpdateRequestTime(now());
-            int width = session.getFramebufferWidth();
-            int height = session.getFramebufferHeight();
-            FramebufferUpdateRequest updateRequest = new FramebufferUpdateRequest(incremental, 0, 0, width, height);
-            sendMessage(updateRequest);
-        }
+    private void requestFramebufferUpdate(boolean incremental) throws IOException {
+        int width = session.getFramebufferWidth();
+        int height = session.getFramebufferHeight();
+        FramebufferUpdateRequest updateRequest = new FramebufferUpdateRequest(incremental, 0, 0, width, height);
+        sendMessage(updateRequest);
+        lastFramebufferUpdateRequestTime = now();
     }
 
     private void sendMessage(Encodable message) throws IOException {
@@ -119,13 +119,6 @@ public class ClientEventHandler {
             message.encode(session.getOutputStream());
         } finally {
             outputLock.unlock();
-        }
-    }
-
-    private void pause() {
-        try {
-            sleep(1L);
-        } catch (InterruptedException ignored) {
         }
     }
 }

@@ -14,6 +14,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -43,7 +44,6 @@ public class Framebuffer {
     }
 
     public void processUpdate(FramebufferUpdate update) throws VncException {
-        session.setLastFramebufferUpdateTime(now());
         InputStream in = session.getInputStream();
         try {
             for (int i = 0; i < update.getNumberOfRectangles(); i++) {
@@ -55,6 +55,7 @@ public class Framebuffer {
                 }
             }
             paint();
+            session.framebufferUpdated();
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }

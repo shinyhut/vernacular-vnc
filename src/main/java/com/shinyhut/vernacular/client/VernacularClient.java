@@ -263,7 +263,7 @@ public class VernacularClient {
         Socket socket = new Socket(host, port);
         InputStream in = new BufferedInputStream(socket.getInputStream());
         OutputStream out = socket.getOutputStream();
-        session = new VncSession(host, port, config, in, out);
+        session = new VncSession(config, in, out);
 
         handshaker.handshake(session);
         initializer.initialise(session);

@@ -4,7 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Vernacular is a pure Java VNC remote desktop client library. Vernacular is open-source and
-released under the MIT license. 
+released under the MIT license. If you find it useful, consider buying me a coffee:
+
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I7Q80V)
 
 ## Getting Started
 

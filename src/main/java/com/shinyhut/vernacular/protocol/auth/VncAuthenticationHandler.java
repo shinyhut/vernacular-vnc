@@ -36,7 +36,9 @@ public class VncAuthenticationHandler implements SecurityHandler {
         OutputStream out = session.getOutputStream();
 
         try {
-            requestVncAuthentication(out);
+            if (!session.getProtocolVersion().equals(3, 3)) {
+                requestVncAuthentication(out);
+            }
             byte[] challenge = readChallenge(in);
             sendResponse(out, challenge, passwordSupplier.get());
         } catch (GeneralSecurityException e) {

@@ -13,9 +13,11 @@ public class NoSecurityHandler implements SecurityHandler {
 
     @Override
     public SecurityResult authenticate(VncSession session) throws IOException {
-        new DataOutputStream(session.getOutputStream()).writeByte(NO_SECURITY_TYPE);
         ProtocolVersion protocolVersion = session.getProtocolVersion();
-        if (protocolVersion.getMajor() == 3 && protocolVersion.getMinor() == 8) {
+        if (!protocolVersion.equals(3, 3)) {
+            new DataOutputStream(session.getOutputStream()).writeByte(NO_SECURITY_TYPE);
+        }
+        if (protocolVersion.equals(3, 8)) {
             return SecurityResult.decode(session.getInputStream(), session.getProtocolVersion());
         } else {
             return new SecurityResult(true);

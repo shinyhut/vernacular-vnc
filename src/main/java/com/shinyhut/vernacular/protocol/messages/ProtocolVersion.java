@@ -36,6 +36,14 @@ public class ProtocolVersion implements Encodable {
         out.write(format("RFB %03d.%03d\n", major, minor).getBytes(Charset.forName("US-ASCII")));
     }
 
+    public boolean equals(int major, int minor) {
+        return this.major == major && this.minor == minor;
+    }
+
+    public boolean atLeast(int major, int minor) {
+        return this.major >= major && this.minor >= minor;
+    }
+
     public static ProtocolVersion decode(InputStream in) throws VncException, IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String message = br.readLine();

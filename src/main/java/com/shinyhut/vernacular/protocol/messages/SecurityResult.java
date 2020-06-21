@@ -31,7 +31,7 @@ public class SecurityResult {
         int resultCode = dataInput.readInt();
         SecurityResult result;
         if (resultCode == 1) {
-            if (version.getMajor() == 3 && version.getMinor() == 8) {
+            if (version.equals(3, 8)) {
                 ErrorMessage errorMessage = ErrorMessage.decode(in);
                 result = new SecurityResult(false, errorMessage.getMessage());
             } else {

@@ -11,7 +11,20 @@ class NoSecurityHandlerTest extends Specification {
     @Subject
     handler = new NoSecurityHandler()
 
-    def "should request SecurityType 'NONE' and, for RFB Protocol Version 3.7, return a 'success' result"() {
+    def "for protocol version 3.3, sends no data and returns a 'success' result"() {
+        given:
+        def session = new VncSession(Mock(VernacularConfig), new ByteArrayInputStream(), new ByteArrayOutputStream())
+        session.protocolVersion = new ProtocolVersion(3, 3)
+
+        when:
+        def result = handler.authenticate(session)
+
+        then:
+        session.outputStream.toByteArray() == []
+        result.success
+    }
+
+    def "for protocol version 3.7, should request SecurityType 'NONE' and return a 'success' result"() {
         given:
         def session = new VncSession(Mock(VernacularConfig), new ByteArrayInputStream(), new ByteArrayOutputStream())
         session.protocolVersion = new ProtocolVersion(3, 7)
@@ -24,7 +37,7 @@ class NoSecurityHandlerTest extends Specification {
         result.success
     }
 
-    def "should request SecurityType 'NONE' and, for RFB Protocol Version 3.8, return the server's response"() {
+    def "for protocol version 3.8, should request SecurityType 'NONE' and return the server's response"() {
         given:
         def input = new ByteArrayInputStream([0x00, 0x00, 0x00, 0x00] as byte[])
         def session = new VncSession(Mock(VernacularConfig), input, new ByteArrayOutputStream())

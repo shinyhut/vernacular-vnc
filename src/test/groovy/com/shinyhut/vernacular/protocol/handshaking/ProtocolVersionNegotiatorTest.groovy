@@ -30,6 +30,7 @@ class ProtocolVersionNegotiatorTest extends Specification {
 
         where:
         serverMajor | serverMinor | selectedMajor | selectedMinor
+        3           | 3           | 3             | 3
         3           | 7           | 3             | 7
         3           | 8           | 3             | 8
         3           | 9           | 3             | 8
@@ -37,7 +38,7 @@ class ProtocolVersionNegotiatorTest extends Specification {
 
     def "should throw an exception if the server does not support the minimum RFB protocol version supported by this client"() {
         given:
-        def bytes = new ByteArrayInputStream("RFB 003.003\n".bytes)
+        def bytes = new ByteArrayInputStream("RFB 003.002\n".bytes)
         def session = Mock(VncSession)
         _ * session.inputStream >> bytes
 

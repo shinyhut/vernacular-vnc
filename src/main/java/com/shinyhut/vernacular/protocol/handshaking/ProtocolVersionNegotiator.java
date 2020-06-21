@@ -12,13 +12,13 @@ import static java.lang.Math.min;
 public class ProtocolVersionNegotiator {
 
     private static final int MAJOR_VERSION = 3;
-    private static final int MIN_MINOR_VERSION = 7;
+    private static final int MIN_MINOR_VERSION = 3;
     private static final int MAX_MINOR_VERSION = 8;
 
     public void negotiate(VncSession session) throws IOException, VncException {
         ProtocolVersion serverVersion = ProtocolVersion.decode(session.getInputStream());
 
-        if (!isSupported(serverVersion)) {
+        if (!serverVersion.atLeast(MAJOR_VERSION, MIN_MINOR_VERSION)) {
             throw new UnsupportedProtocolVersionException(
                     serverVersion.getMajor(),
                     serverVersion.getMinor(),
@@ -34,9 +34,5 @@ public class ProtocolVersionNegotiator {
 
         session.setProtocolVersion(clientVersion);
         clientVersion.encode(session.getOutputStream());
-    }
-
-    private boolean isSupported(ProtocolVersion serverVersion) {
-        return serverVersion.getMajor() == MAJOR_VERSION && serverVersion.getMinor() >= MIN_MINOR_VERSION;
     }
 }

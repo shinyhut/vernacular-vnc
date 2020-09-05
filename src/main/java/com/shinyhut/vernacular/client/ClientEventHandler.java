@@ -67,6 +67,7 @@ public class ClientEventHandler {
         running = false;
         try {
             if (framebufferUpdateLoop != null) {
+                framebufferUpdateLoop.interrupt();
                 framebufferUpdateLoop.join(1000);
             }
         } catch (InterruptedException ignored) {

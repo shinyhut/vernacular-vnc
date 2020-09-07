@@ -15,7 +15,7 @@ class VncAuthenticationHandlerTest extends Specification {
     @Subject
     handler = new VncAuthenticationHandler()
 
-    def "for protocol version 3.3, should encrypt the server's challenge and send the result"() {
+    def "for protocol version 3_3, should encrypt the server's challenge and send the result"() {
         given:
         def config = Mock(VernacularConfig) {
             1 * getPasswordSupplier() >> new Supplier<String>() {
@@ -53,7 +53,7 @@ class VncAuthenticationHandlerTest extends Specification {
     }
 
     @Unroll
-    def "for protocol version >= 3.7, should request SecurityType 'VNC', encrypt the server's challenge and send the result"() {
+    def "for protocol versions 3_7 and above, should request SecurityType 'VNC', encrypt the server's challenge and send the result"() {
         given:
         def config = Mock(VernacularConfig) {
             1 * getPasswordSupplier() >> new Supplier<String>() {

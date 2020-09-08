@@ -20,7 +20,7 @@ Vernacular is also available through Maven thanks to [JCenter](https://bintray.c
     <dependency>
         <groupId>com.shinyhut</groupId>
         <artifactId>vernacular</artifactId>
-        <version>1.9</version>
+        <version>1.10</version>
     </dependency>
 </dependencies>
 ```
@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.shinyhut:vernacular:1.9'
+    compile 'com.shinyhut:vernacular:1.10'
 }
 ```
 

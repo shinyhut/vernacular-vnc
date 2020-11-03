@@ -47,10 +47,13 @@ public class VernacularClient {
      * @param port Remote port to connect to
      * @throws IllegalStateException if the client is already running
      */
-    public void start(String host, int port) throws IOException {
-        startSocket(new Socket(host, port));
+    public void start(String host, int port) {
+        try {
+            start(new Socket(host, port));
+        } catch (IOException e) {
+            handleError(new UnexpectedVncException(e));
+        }
     }
-
 
     /**
      * Starts the VNC client by connecting to the specified socket
@@ -58,7 +61,7 @@ public class VernacularClient {
      * @param socket Socket to connect to
      * @throws IllegalStateException if the client is already running
      */
-    public void startSocket(Socket socket) {
+    public void start(Socket socket) {
         if (running) {
             throw new IllegalStateException("VNC Client is already running");
         }

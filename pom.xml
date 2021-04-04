@@ -2,11 +2,37 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.shinyhut</groupId>
     <artifactId>vernacular</artifactId>
     <packaging>jar</packaging>
     <version>1.11</version>
+
     <name>vernacular</name>
+    <description>A pure Java VNC client library and viewer application.</description>
+    <url>https://github.com/shinyhut/vernacular-vnc</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Paul Guare</name>
+            <email>paul.guare@shinyhut.com</email>
+            <organization>ShinyHut Solutions Ltd</organization>
+            <organizationUrl>http://www.shinyhut.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/shinyhut/vernacular-vnc.git</connection>
+        <developerConnection>scm:git:ssh://github.com:shinyhut/vernacular-vnc.git</developerConnection>
+        <url>http://github.com/shinyhut/vernacular-vnc/tree/master</url>
+    </scm>
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -118,10 +144,38 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>bintray-shinyhut-oss-vernacular</id>
-            <url>https://api.bintray.com/maven/shinyhut/oss/vernacular/;publish=1</url>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 

@@ -4,14 +4,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Vernacular is a pure Java VNC remote desktop client library. Vernacular is open-source and
-released under the MIT license. If you find it useful, consider buying me a coffee:
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I7Q80V)
+released under the MIT license.
 
 ## Getting Started
 
 The latest releases are available for manual download from our [releases page](https://github.com/shinyhut/vernacular-vnc/releases).
-Vernacular is also available through Maven thanks to [JCenter](https://bintray.com/bintray/jcenter):
+Vernacular is also available through Maven:
 
 ### Maven
 
@@ -24,20 +22,11 @@ Vernacular is also available through Maven thanks to [JCenter](https://bintray.c
     </dependency>
 </dependencies>
 ```
-```xml
-<repositories>
-    <repository>
-        <id>central</id>
-        <name>jcenter</name>
-        <url>http://jcenter.bintray.com</url>
-    </repository>
-</repositories>
-```
 
 ### Gradle
 ```groovy
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {

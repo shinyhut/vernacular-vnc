@@ -32,4 +32,26 @@ class ByteUtilsTest extends Specification {
         then:
         result == [0x0f, 0xf0] as byte[]
     }
+
+    def "should return true or false depending on whether the bit at the specified index in the gven byte is 1 or 0"() {
+        given:
+        def input = (byte) 0x0f
+
+        when:
+        def result = ByteUtils.bitAt(input, index)
+
+        then:
+        result == expected
+
+        where:
+        index | expected
+        0     | true
+        1     | true
+        2     | true
+        3     | true
+        4     | false
+        5     | false
+        6     | false
+        7     | false
+    }
 }

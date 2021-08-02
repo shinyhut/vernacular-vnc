@@ -15,6 +15,10 @@ public class SetEncodings implements Encodable {
         this.encodings = asList(encodings);
     }
 
+    public SetEncodings(List<Encoding> encodings) {
+        this.encodings = encodings;
+    }
+
     @Override
     public void encode(OutputStream out) throws IOException {
         DataOutputStream dataOutput = new DataOutputStream(out);

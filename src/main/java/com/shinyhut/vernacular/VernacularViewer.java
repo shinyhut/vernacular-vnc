@@ -58,7 +58,7 @@ public class VernacularViewer extends JFrame {
     private volatile boolean shutdown = false;
 
     private Thread clipboardMonitor = new Thread(() -> {
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Clipboard clipboard = getDefaultToolkit().getSystemClipboard();
 
         String lastText = null;
         while (!shutdown) {
@@ -192,8 +192,10 @@ public class VernacularViewer extends JFrame {
         });
         config.setPasswordSupplier(this::showPasswordDialog);
         config.setScreenUpdateListener(this::renderFrame);
+        config.setMousePointerUpdateListener((p, h) -> this.setCursor(getDefaultToolkit().createCustomCursor(p, h, "vnc")));
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
+        config.setUseLocalMousePointer(true);
         client = new VernacularClient(config);
     }
 

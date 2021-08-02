@@ -14,20 +14,21 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static com.shinyhut.vernacular.protocol.messages.Encoding.*;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static java.time.LocalDateTime.now;
 
 public class Framebuffer {
 
     private final VncSession session;
     private final Map<BigInteger, ColorMapEntry> colorMap = new ConcurrentHashMap<>();
     private final Map<Encoding, Renderer> renderers = new ConcurrentHashMap<>();
+    private final CursorRenderer cursorRenderer;
 
     private BufferedImage frame;
 
@@ -38,6 +39,7 @@ public class Framebuffer {
         renderers.put(COPYRECT, new CopyRectRenderer());
         renderers.put(RRE, new RRERenderer(pixelDecoder, session.getPixelFormat()));
         renderers.put(HEXTILE, new HextileRenderer(rawRenderer, pixelDecoder, session.getPixelFormat()));
+        cursorRenderer = new CursorRenderer(rawRenderer);
 
         frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
         this.session = session;
@@ -50,6 +52,8 @@ public class Framebuffer {
                 Rectangle rectangle = Rectangle.decode(in);
                 if (rectangle.getEncoding() == DESKTOP_SIZE) {
                     resizeFramebuffer(rectangle);
+                } else if (rectangle.getEncoding() == CURSOR) {
+                    updateCursor(rectangle, in);
                 } else {
                     renderers.get(rectangle.getEncoding()).render(in, frame, rectangle);
                 }
@@ -85,6 +89,17 @@ public class Framebuffer {
         BufferedImage resized = new BufferedImage(width, height, TYPE_INT_RGB);
         resized.getGraphics().drawImage(frame, 0, 0, null);
         frame = resized;
+    }
+
+    private void updateCursor(Rectangle cursor, InputStream in) throws VncException {
+        if (cursor.getWidth() > 0 && cursor.getHeight() > 0) {
+            BufferedImage cursorImage = new BufferedImage(cursor.getWidth(), cursor.getHeight(), TYPE_INT_ARGB);
+            cursorRenderer.render(in, cursorImage, cursor);
+            BiConsumer<Image, Point> listener = session.getConfig().getMousePointerUpdateListener();
+            if (listener != null) {
+                listener.accept(cursorImage, new Point(cursor.getX(), cursor.getY()));
+            }
+        }
     }
 
 }

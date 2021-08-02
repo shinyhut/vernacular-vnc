@@ -4,6 +4,7 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
 
 import java.awt.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -16,9 +17,11 @@ public class VernacularConfig {
     private Consumer<Image> screenUpdateListener;
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
+    private BiConsumer<Image, Point> mousePointerUpdateListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8_INDEXED;
+    private boolean useLocalMousePointer = false;
 
     public Supplier<String> getPasswordSupplier() {
         return passwordSupplier;
@@ -59,6 +62,22 @@ public class VernacularConfig {
      */
     public void setScreenUpdateListener(Consumer<Image> screenUpdateListener) {
         this.screenUpdateListener = screenUpdateListener;
+    }
+
+    public BiConsumer<Image, Point> getMousePointerUpdateListener() {
+        return mousePointerUpdateListener;
+    }
+
+    /**
+     * Specifies a Consumer which will be passed an Image representing the remote server's mouse pointer image, and a
+     * Point representing its hotspot (i.e. the point within the cursor that interacts with other elements on the
+     * screen).
+     *
+     * @param mousePointerUpdateListener A Consumer which will receive Images representing the updated cursor shape
+     * @see java.awt.Image Image
+     */
+    public void setMousePointerUpdateListener(BiConsumer<Image, Point> mousePointerUpdateListener) {
+        this.mousePointerUpdateListener = mousePointerUpdateListener;
     }
 
     public Consumer<String> getRemoteClipboardListener() {
@@ -137,5 +156,21 @@ public class VernacularConfig {
      */
     public void setColorDepth(ColorDepth colorDepth) {
         this.colorDepth = colorDepth;
+    }
+
+    /**
+     * Indicate to the server that the client can draw the mouse pointer locally. The server should not include the
+     * mouse pointer in framebuffer updates, and it should send separate notifications when the mouse pointer image
+     * changes
+     *
+     * @see #setMousePointerUpdateListener(BiConsumer)
+     * @param useLocalMousePointer enable or disable client side mouse pointer rendering
+     */
+    public void setUseLocalMousePointer(boolean useLocalMousePointer) {
+        this.useLocalMousePointer = useLocalMousePointer;
+    }
+
+    public boolean isUseLocalMousePointer() {
+        return useLocalMousePointer;
     }
 }

@@ -37,6 +37,7 @@ public class VernacularViewer extends JFrame {
 
     private JMenuItem bpp8IndexedColorMenuItem;
     private JMenuItem bpp16TrueColorMenuItem;
+    private JMenuItem localCursorMenuItem;
 
     private Image lastFrame;
 
@@ -154,16 +155,13 @@ public class VernacularViewer extends JFrame {
                 }
             }
         });
-        getContentPane().addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                if (connected()) {
-                    int notches = e.getWheelRotation();
-                    if (notches < 0) {
-                        client.scrollUp();
-                    } else {
-                        client.scrollDown();
-                    }
+        getContentPane().addMouseWheelListener(e -> {
+            if (connected()) {
+                int notches = e.getWheelRotation();
+                if (notches < 0) {
+                    client.scrollUp();
+                } else {
+                    client.scrollDown();
                 }
             }
         });
@@ -195,7 +193,7 @@ public class VernacularViewer extends JFrame {
         config.setMousePointerUpdateListener((p, h) -> this.setCursor(getDefaultToolkit().createCustomCursor(p, h, "vnc")));
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
-        config.setUseLocalMousePointer(true);
+        config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
         client = new VernacularClient(config);
     }
 
@@ -210,12 +208,12 @@ public class VernacularViewer extends JFrame {
 
         connectMenuItem = new JMenuItem("Connect");
         connectMenuItem.setMnemonic(VK_C);
-        connectMenuItem.addActionListener((ActionEvent event) -> showConnectDialog());
+        connectMenuItem.addActionListener(event -> showConnectDialog());
 
         disconnectMenuItem = new JMenuItem("Disconnect");
         disconnectMenuItem.setMnemonic(VK_D);
         disconnectMenuItem.setEnabled(false);
-        disconnectMenuItem.addActionListener((ActionEvent event) -> disconnect());
+        disconnectMenuItem.addActionListener(event -> disconnect());
 
         ButtonGroup colorDepths = new ButtonGroup();
 
@@ -224,12 +222,15 @@ public class VernacularViewer extends JFrame {
         colorDepths.add(bpp8IndexedColorMenuItem);
         colorDepths.add(bpp16TrueColorMenuItem);
 
-        bpp8IndexedColorMenuItem.addActionListener((ActionEvent event) -> config.setColorDepth(BPP_8_INDEXED));
-        bpp16TrueColorMenuItem.addActionListener((ActionEvent event) -> config.setColorDepth(BPP_16_TRUE));
+        bpp8IndexedColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_8_INDEXED));
+        bpp16TrueColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_16_TRUE));
+
+        localCursorMenuItem = new JCheckBoxMenuItem("Use Local Cursor", true);
+        localCursorMenuItem.addActionListener(event -> config.setUseLocalMousePointer(localCursorMenuItem.isSelected()));
 
         JMenuItem exit = new JMenuItem("Exit");
         exit.setMnemonic(VK_X);
-        exit.addActionListener((ActionEvent event) -> {
+        exit.addActionListener(event -> {
             disconnect();
             exit(0);
         });
@@ -239,6 +240,7 @@ public class VernacularViewer extends JFrame {
         file.add(exit);
         options.add(bpp8IndexedColorMenuItem);
         options.add(bpp16TrueColorMenuItem);
+        options.add(localCursorMenuItem);
         menu.add(file);
         menu.add(options);
         setJMenuBar(menu);
@@ -307,11 +309,13 @@ public class VernacularViewer extends JFrame {
             disconnectMenuItem.setEnabled(true);
             bpp8IndexedColorMenuItem.setEnabled(false);
             bpp16TrueColorMenuItem.setEnabled(false);
+            localCursorMenuItem.setEnabled(false);
         } else {
             connectMenuItem.setEnabled(true);
             disconnectMenuItem.setEnabled(false);
             bpp8IndexedColorMenuItem.setEnabled(true);
             bpp16TrueColorMenuItem.setEnabled(true);
+            localCursorMenuItem.setEnabled(true);
         }
     }
 

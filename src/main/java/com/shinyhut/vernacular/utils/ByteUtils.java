@@ -24,4 +24,8 @@ public class ByteUtils {
     public static boolean mask(int input, int mask) {
         return (input & mask) != 0;
     }
+
+    public static boolean bitAt(int input, int position) {
+        return (input & (0x01 << position)) != 0;
+    }
 }

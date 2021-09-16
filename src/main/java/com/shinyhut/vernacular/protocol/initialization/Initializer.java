@@ -7,8 +7,11 @@ import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.shinyhut.vernacular.protocol.messages.Encoding.*;
+import static java.util.Arrays.asList;
 
 public class Initializer {
 
@@ -39,7 +42,14 @@ public class Initializer {
                 colorDepth.getBlueShift());
 
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
-        SetEncodings setEncodings = new SetEncodings(HEXTILE, RRE, COPYRECT, RAW, DESKTOP_SIZE);
+
+        List<Encoding> encodings = new ArrayList<>(asList(HEXTILE, RRE, COPYRECT, RAW, DESKTOP_SIZE));
+
+        if (config.isUseLocalMousePointer()) {
+            encodings.add(CURSOR);
+        }
+
+        SetEncodings setEncodings = new SetEncodings(encodings);
 
         setPixelFormat.encode(out);
         setEncodings.encode(out);

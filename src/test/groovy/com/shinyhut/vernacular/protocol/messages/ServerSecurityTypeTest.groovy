@@ -4,6 +4,7 @@ import com.shinyhut.vernacular.client.exceptions.HandshakingFailedException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.MS_LOGON_2
 import static com.shinyhut.vernacular.protocol.messages.SecurityType.NONE
 import static com.shinyhut.vernacular.protocol.messages.SecurityType.VNC
 
@@ -12,7 +13,7 @@ class ServerSecurityTypeTest extends Specification {
     @Unroll
     def "should decode a valid ServerSecurityType message"() {
         given:
-        def input = new ByteArrayInputStream([0x00, 0x00, 0x00, securityType.ordinal()] as byte[])
+        def input = new ByteArrayInputStream([0x00, 0x00, 0x00, securityType.code] as byte[])
 
         when:
         def message = ServerSecurityType.decode(input)
@@ -21,7 +22,7 @@ class ServerSecurityTypeTest extends Specification {
         message.securityType == securityType
 
         where:
-        securityType << [NONE, VNC]
+        securityType << [NONE, VNC, MS_LOGON_2]
     }
 
     def "should throw an exception if the response contains an error message"() {

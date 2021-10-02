@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.resolve;
+
 public class ServerSecurityTypes {
 
     private final List<SecurityType> securityTypes;
@@ -33,9 +35,7 @@ public class ServerSecurityTypes {
 
         for (int i = 0; i < typeCount; i++) {
             byte type = dataInput.readByte();
-            if (type < SecurityType.values().length) {
-                types.add(SecurityType.values()[type]);
-            }
+            resolve(type).ifPresent(types::add);
         }
 
         return new ServerSecurityTypes(types);

@@ -3,6 +3,7 @@ package com.shinyhut.vernacular.protocol.messages
 import com.shinyhut.vernacular.client.exceptions.HandshakingFailedException
 import spock.lang.Specification
 
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.MS_LOGON_2
 import static com.shinyhut.vernacular.protocol.messages.SecurityType.NONE
 import static com.shinyhut.vernacular.protocol.messages.SecurityType.VNC
 
@@ -10,13 +11,13 @@ class ServerSecurityTypesTest extends Specification {
 
     def "should decode a valid ServerSecurityTypes message"() {
         given:
-        def input = new ByteArrayInputStream([0x02, 0x01, 0x02] as byte[])
+        def input = new ByteArrayInputStream([0x03, 0x01, 0x02, 0x71] as byte[])
 
         when:
         def message = ServerSecurityTypes.decode(input)
 
         then:
-        message.securityTypes == [NONE, VNC]
+        message.securityTypes == [NONE, VNC, MS_LOGON_2]
     }
 
     def "should throw an exception if the response contains an error message"() {

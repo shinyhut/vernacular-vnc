@@ -12,6 +12,7 @@ import static com.shinyhut.vernacular.client.rendering.ColorDepth.BPP_8_INDEXED;
 
 public class VernacularConfig {
 
+    private Supplier<String> usernameSupplier;
     private Supplier<String> passwordSupplier;
     private Consumer<VncException> errorListener;
     private Consumer<Image> screenUpdateListener;
@@ -22,6 +23,20 @@ public class VernacularConfig {
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8_INDEXED;
     private boolean useLocalMousePointer = false;
+
+    public Supplier<String> getUsernameSupplier() {
+        return usernameSupplier;
+    }
+
+    /**
+     * Specifies a Supplier which will be called to find the VNC username if the remote host uses an authentication
+     * scheme that requires one.
+     *
+     * @param usernameSupplier A Supplier which when invoked will return the user's VNC username
+     */
+    public void setUsernameSupplier(Supplier<String> usernameSupplier) {
+        this.usernameSupplier = usernameSupplier;
+    }
 
     public Supplier<String> getPasswordSupplier() {
         return passwordSupplier;

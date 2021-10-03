@@ -18,7 +18,7 @@ Vernacular is also available through Maven:
     <dependency>
         <groupId>com.shinyhut</groupId>
         <artifactId>vernacular</artifactId>
-        <version>1.12</version>
+        <version>1.13</version>
     </dependency>
 </dependencies>
 ```
@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.shinyhut:vernacular:1.12'
+    compile 'com.shinyhut:vernacular:1.13'
 }
 ```
 

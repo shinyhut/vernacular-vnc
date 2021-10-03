@@ -7,15 +7,15 @@ import com.shinyhut.vernacular.protocol.messages.SecurityResult;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class NoSecurityHandler implements SecurityHandler {
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.NONE;
 
-    private static final byte NO_SECURITY_TYPE = 0x01;
+public class NoSecurityHandler implements SecurityHandler {
 
     @Override
     public SecurityResult authenticate(VncSession session) throws IOException {
         ProtocolVersion protocolVersion = session.getProtocolVersion();
         if (!protocolVersion.equals(3, 3)) {
-            new DataOutputStream(session.getOutputStream()).writeByte(NO_SECURITY_TYPE);
+            new DataOutputStream(session.getOutputStream()).writeByte(NONE.getCode());
         }
         if (protocolVersion.equals(3, 8)) {
             return SecurityResult.decode(session.getInputStream(), session.getProtocolVersion());

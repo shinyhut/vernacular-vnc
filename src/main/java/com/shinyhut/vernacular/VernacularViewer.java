@@ -188,6 +188,7 @@ public class VernacularViewer extends JFrame {
             showMessageDialog(this, e.getMessage(), "Error", ERROR_MESSAGE);
             setMenuState(false);
         });
+        config.setUsernameSupplier(this::showUsernameDialog);
         config.setPasswordSupplier(this::showPasswordDialog);
         config.setScreenUpdateListener(this::renderFrame);
         config.setMousePointerUpdateListener((p, h) -> this.setCursor(getDefaultToolkit().createCustomCursor(p, h, "vnc")));
@@ -275,6 +276,19 @@ public class VernacularViewer extends JFrame {
             }
             connect(host, port);
         }
+    }
+
+    private String showUsernameDialog() {
+        String username = "";
+        JPanel usernameDialog = new JPanel();
+        JTextField usernameField = new JTextField(20);
+        usernameField.addAncestorListener(focusRequester);
+        usernameDialog.add(usernameField);
+        int choice = showConfirmDialog(this, usernameDialog, "Enter Username", OK_CANCEL_OPTION);
+        if (choice == OK_OPTION) {
+            username = usernameField.getText();
+        }
+        return username;
     }
 
     private String showPasswordDialog() {

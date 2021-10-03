@@ -54,4 +54,36 @@ class ByteUtilsTest extends Specification {
         6     | false
         7     | false
     }
+
+    def "should return the specified input left padded with 0s to the required number of bytes"() {
+        when:
+        def result = ByteUtils.padLeft(input as byte[], length)
+
+        then:
+        result == expected as byte[]
+
+        where:
+        input              | length | expected
+        [0xFF]             | 1      | [0xFF]
+        [0xFF]             | 2      | [0x00, 0xFF]
+        [0x12, 0x34]       | 4      | [0x00, 0x00, 0x12, 0x34]
+        [0x00, 0x12, 0x34] | 4      | [0x00, 0x00, 0x12, 0x34]
+        [0x00, 0x12, 0x34] | 3      | [0x00, 0x12, 0x34]
+    }
+
+    def "should return the specified input right padded with 0s to the required number of bytes"() {
+        when:
+        def result = ByteUtils.padRight(input as byte[], length)
+
+        then:
+        result == expected as byte[]
+
+        where:
+        input              | length | expected
+        [0xFF]             | 1      | [0xFF]
+        [0xFF]             | 2      | [0xFF, 0x00]
+        [0x12, 0x34]       | 4      | [0x12, 0x34, 0x00, 0x00]
+        [0x00, 0x12, 0x34] | 4      | [0x00, 0x12, 0x34, 0x00]
+        [0x00, 0x12, 0x34] | 3      | [0x00, 0x12, 0x34]
+    }
 }

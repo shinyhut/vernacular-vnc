@@ -7,6 +7,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.resolve;
+
 public class ServerSecurityType {
 
     private final SecurityType securityType;
@@ -28,10 +30,6 @@ public class ServerSecurityType {
             throw new HandshakingFailedException(errorMessage.getMessage());
         }
 
-        if (type < SecurityType.values().length) {
-            return new ServerSecurityType(SecurityType.values()[type]);
-        } else {
-            throw new NoSupportedSecurityTypesException();
-        }
+        return resolve(type).map(ServerSecurityType::new).orElseThrow(NoSupportedSecurityTypesException::new);
     }
 }

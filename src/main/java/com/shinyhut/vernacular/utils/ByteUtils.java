@@ -1,5 +1,7 @@
 package com.shinyhut.vernacular.utils;
 
+import static java.lang.System.arraycopy;
+
 public class ByteUtils {
 
     private ByteUtils() {
@@ -27,5 +29,17 @@ public class ByteUtils {
 
     public static boolean bitAt(int input, int position) {
         return (input & (0x01 << position)) != 0;
+    }
+
+    public static byte[] padLeft(byte[] input, int length) {
+        byte[] padded = new byte[length];
+        arraycopy(input, 0, padded, length - input.length, input.length);
+        return padded;
+    }
+
+    public static byte[] padRight(byte[] input, int length) {
+        byte[] padded = new byte[length];
+        arraycopy(input, 0, padded, 0, input.length);
+        return padded;
     }
 }

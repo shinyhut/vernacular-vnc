@@ -16,13 +16,12 @@ import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.function.Supplier;
 
+import static com.shinyhut.vernacular.protocol.messages.SecurityType.VNC;
 import static com.shinyhut.vernacular.utils.ByteUtils.reverseBits;
 import static java.lang.System.arraycopy;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class VncAuthenticationHandler implements SecurityHandler {
-
-    private static final byte VNC_AUTHENTICATION_TYPE = 0x02;
 
     @Override
     public SecurityResult authenticate(VncSession session) throws VncException, IOException {
@@ -49,7 +48,7 @@ public class VncAuthenticationHandler implements SecurityHandler {
     }
 
     private static void requestVncAuthentication(OutputStream out) throws IOException {
-        out.write(VNC_AUTHENTICATION_TYPE);
+        out.write(VNC.getCode());
     }
 
     private static byte[] readChallenge(InputStream in) throws IOException {

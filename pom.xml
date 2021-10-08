@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-bom</artifactId>
-                <version>2.0-M3-groovy-2.5</version>
+                <version>2.0-groovy-3.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -64,15 +64,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>3.0.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.10.10</version>
+            <version>1.11.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.1</version>
+            <version>3.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -120,7 +126,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.3</version>
+                <version>1.12.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -134,10 +140,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
                 <configuration>
+                    <useModulePath>false</useModulePath>
                     <useFile>false</useFile>
                     <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Spec.java</include>
+                        <include>**/*Test</include>
+                        <include>**/*Spec</include>
                     </includes>
                 </configuration>
             </plugin>

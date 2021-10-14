@@ -23,6 +23,10 @@ public class VernacularConfig {
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8_INDEXED;
     private boolean useLocalMousePointer = false;
+    private boolean enableCopyrectEncoding = true;
+    private boolean enableRreEncoding = true;
+    private boolean enableHextileEncoding = true;
+    private boolean enableZLibEncoding = false;
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
@@ -187,5 +191,54 @@ public class VernacularConfig {
 
     public boolean isUseLocalMousePointer() {
         return useLocalMousePointer;
+    }
+
+    public boolean isEnableCopyrectEncoding() {
+        return enableCopyrectEncoding;
+    }
+
+    /**
+     * Enable or disable the COPYRECT video encoding
+     * @param enableCopyrectEncoding enable or disable the COPYRECT video encoding
+     */
+    public void setEnableCopyrectEncoding(boolean enableCopyrectEncoding) {
+        this.enableCopyrectEncoding = enableCopyrectEncoding;
+    }
+
+    public boolean isEnableRreEncoding() {
+        return enableRreEncoding;
+    }
+
+    /**
+     * Enable or disable the RRE video encoding
+     * @param enableRreEncoding enable or disable the RRE video encoding
+     */
+    public void setEnableRreEncoding(boolean enableRreEncoding) {
+        this.enableRreEncoding = enableRreEncoding;
+    }
+
+    public boolean isEnableHextileEncoding() {
+        return enableHextileEncoding;
+    }
+
+    /**
+     * Enable or disable the HEXTILE video encoding
+     * @param enableHextileEncoding enable or disable the HEXTILE video encoding
+     */
+    public void setEnableHextileEncoding(boolean enableHextileEncoding) {
+        this.enableHextileEncoding = enableHextileEncoding;
+    }
+
+    public boolean isEnableZLibEncoding() {
+        return enableZLibEncoding;
+    }
+
+    /**
+     * Enable or disable the ZLIB video encoding. This encoding is disabled by default because it is very expensive
+     * in terms of CPU usage, but it may be useful in situations where you are bandwidth constrained.
+     * @param enableZLibEncoding enable or disable the ZLIB video encoding
+     */
+    public void setEnableZLibEncoding(boolean enableZLibEncoding) {
+        this.enableZLibEncoding = enableZLibEncoding;
     }
 }

@@ -10,6 +10,7 @@ public enum Encoding {
     COPYRECT(1),
     RRE(2),
     HEXTILE(5),
+    ZLIB(6),
     DESKTOP_SIZE(-223),
     CURSOR(-239)
     ;

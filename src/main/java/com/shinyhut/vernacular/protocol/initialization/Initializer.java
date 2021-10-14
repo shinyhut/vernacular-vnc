@@ -43,7 +43,26 @@ public class Initializer {
 
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
 
-        List<Encoding> encodings = new ArrayList<>(asList(HEXTILE, RRE, COPYRECT, RAW, DESKTOP_SIZE));
+        List<Encoding> encodings = new ArrayList<>();
+
+        if (config.isEnableZLibEncoding()) {
+            encodings.add(ZLIB);
+        }
+
+        if (config.isEnableHextileEncoding()) {
+            encodings.add(HEXTILE);
+        }
+
+        if (config.isEnableRreEncoding()) {
+            encodings.add(RRE);
+        }
+
+        if (config.isEnableCopyrectEncoding()) {
+            encodings.add(COPYRECT);
+        }
+
+        encodings.add(RAW);
+        encodings.add(DESKTOP_SIZE);
 
         if (config.isUseLocalMousePointer()) {
             encodings.add(CURSOR);

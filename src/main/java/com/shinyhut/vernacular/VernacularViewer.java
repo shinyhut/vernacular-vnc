@@ -212,7 +212,6 @@ public class VernacularViewer extends JFrame {
         config = new VernacularConfig();
         config.setColorDepth(BPP_16_TRUE);
         config.setErrorListener(e -> {
-            String message = e.getMessage();
             showMessageDialog(this, e.getMessage(), "Error", ERROR_MESSAGE);
             resetUI();
         });

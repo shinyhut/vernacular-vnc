@@ -48,6 +48,8 @@ public class ClientEventHandler {
                         requestFramebufferUpdate(incremental);
                         incremental = true;
                         session.waitForFramebufferUpdate();
+                    } else {
+                        waitUntilFramebufferUpdateTime();
                     }
                 }
             } catch (IOException e) {
@@ -104,6 +106,15 @@ public class ClientEventHandler {
         long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
         return lastFramebufferUpdateRequestTime == null ||
                 now().isAfter(lastFramebufferUpdateRequestTime.plus(updateInterval, MILLIS));
+    }
+
+    private void waitUntilFramebufferUpdateTime() throws InterruptedException {
+        long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
+        LocalDateTime nextUpdate = lastFramebufferUpdateRequestTime.plus(updateInterval, MILLIS);
+        long timeToWait = now().until(nextUpdate, MILLIS);
+        if (timeToWait > 0L) {
+            Thread.sleep(timeToWait);
+        }
     }
 
     private void requestFramebufferUpdate(boolean incremental) throws IOException {

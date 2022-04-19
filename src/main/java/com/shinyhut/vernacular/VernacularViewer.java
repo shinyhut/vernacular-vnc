@@ -222,6 +222,7 @@ public class VernacularViewer extends JFrame {
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
+        config.setEnableExtendedClipboardEncoding(true);
         client = new VernacularClient(config);
     }
 
@@ -299,9 +300,9 @@ public class VernacularViewer extends JFrame {
 
     private void showConnectDialog() {
         JPanel connectDialog = new JPanel();
-        JTextField hostField = new JTextField(20);
+        JTextField hostField = new JTextField("localhost", 20);
         hostField.addAncestorListener(focusRequester);
-        JTextField portField = new JTextField("5900");
+        JTextField portField = new JTextField("5901");
         JLabel hostLabel = new JLabel("Host");
         hostLabel.setLabelFor(hostField);
         JLabel portLabel = new JLabel("Port");
@@ -342,9 +343,9 @@ public class VernacularViewer extends JFrame {
     }
 
     private String showPasswordDialog() {
-        String password = "";
+        String password = "headless";
         JPanel passwordDialog = new JPanel();
-        JPasswordField passwordField = new JPasswordField(20);
+        JPasswordField passwordField = new JPasswordField("headless",20);
         passwordField.addAncestorListener(focusRequester);
         passwordDialog.add(passwordField);
         int choice = showConfirmDialog(this, passwordDialog, "Enter Password", OK_CANCEL_OPTION);

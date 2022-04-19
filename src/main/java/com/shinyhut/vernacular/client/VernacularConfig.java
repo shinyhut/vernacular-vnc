@@ -2,6 +2,7 @@ package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
+import com.shinyhut.vernacular.protocol.messages.ServerCutText;
 
 import java.awt.*;
 import java.util.function.BiConsumer;
@@ -18,6 +19,7 @@ public class VernacularConfig {
     private Consumer<Image> screenUpdateListener;
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
+    private Consumer<ServerCutText> extendedClipboardListener;
     private BiConsumer<Image, Point> mousePointerUpdateListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
@@ -27,6 +29,7 @@ public class VernacularConfig {
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
+    private boolean enableExtendedClipboardEncoding = false;
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
@@ -240,5 +243,26 @@ public class VernacularConfig {
      */
     public void setEnableZLibEncoding(boolean enableZLibEncoding) {
         this.enableZLibEncoding = enableZLibEncoding;
+    }
+
+    public boolean isEnableExtendedClipboardEncoding() {
+        return enableExtendedClipboardEncoding;
+    }
+
+    /**
+     * Enable or disable the Extended Clipboard encoding. This encoding is disabled by default because
+     * it is a non-standard extension to RFB protocol supporting UTF-8 clipboard copy/paste operations.
+     * @param enableExtendedClipboardEncoding enable or disablle the Extended Clipboard Encoding.
+     */
+    public void setEnableExtendedClipboardEncoding(boolean enableExtendedClipboardEncoding) {
+        this.enableExtendedClipboardEncoding = enableExtendedClipboardEncoding;
+    }
+
+    public Consumer<ServerCutText> getExtendedClipboardListener() {
+        return extendedClipboardListener;
+    }
+
+    public void setExtendedClipboardListener(Consumer<ServerCutText> extendedClipboardListener) {
+        this.extendedClipboardListener = extendedClipboardListener;
     }
 }

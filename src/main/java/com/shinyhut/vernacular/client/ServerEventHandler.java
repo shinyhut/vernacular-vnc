@@ -61,6 +61,10 @@ public class ServerEventHandler {
                             if (cutTextListener != null) {
                                 cutTextListener.accept(cutText.getText());
                             }
+                            Consumer<ServerCutText> extendedClipboardListener = session.getConfig().getExtendedClipboardListener();
+                            if(extendedClipboardListener != null) {
+                                extendedClipboardListener.accept(cutText);
+                            }
                             break;
                         default:
                             throw new UnknownMessageTypeException(messageType);

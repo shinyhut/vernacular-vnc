@@ -6,7 +6,7 @@
     <groupId>com.shinyhut</groupId>
     <artifactId>vernacular</artifactId>
     <packaging>jar</packaging>
-    <version>1.15-SNAPSHOT</version>
+    <version>1.15.1</version>
 
     <name>vernacular</name>
     <description>A pure Java VNC client library and viewer application.</description>
@@ -96,6 +96,7 @@
                         </manifest>
                     </archive>
                 </configuration>
+
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -148,7 +149,22 @@
                     </includes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>com.github.seahen</groupId>
+                <artifactId>maven-s3-wagon</artifactId>
+                <version>1.3.3</version>
+            </extension>
+        </extensions>
     </build>
 
     <profiles>
@@ -176,13 +192,9 @@
     </profiles>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>maven.nuvalence.repo</id>
+            <url>s3://testup-build-artifacts/m2</url>
         </repository>
     </distributionManagement>
 

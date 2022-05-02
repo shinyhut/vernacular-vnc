@@ -45,6 +45,10 @@ public class Initializer {
 
         List<Encoding> encodings = new ArrayList<>();
 
+        if (config.isEnableExtendedClipboardEncoding()) {
+            encodings.add(EXTENDED_CLIPBOARD);
+        }
+
         if (config.isEnableZLibEncoding()) {
             encodings.add(ZLIB);
         }

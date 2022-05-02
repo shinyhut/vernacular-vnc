@@ -27,6 +27,7 @@ public class VernacularConfig {
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
+    private boolean enableExtendedClipboardEncoding = false;
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
@@ -240,5 +241,18 @@ public class VernacularConfig {
      */
     public void setEnableZLibEncoding(boolean enableZLibEncoding) {
         this.enableZLibEncoding = enableZLibEncoding;
+    }
+
+    public boolean isEnableExtendedClipboardEncoding() {
+        return enableExtendedClipboardEncoding;
+    }
+
+    /**
+     * Enable or disable the Extended Clipboard encoding. This encoding is disabled by default because
+     * it is a non-standard extension to RFB protocol supporting UTF-8 clipboard copy/paste operations.
+     * @param enableExtendedClipboardEncoding enable or disablle the Extended Clipboard Encoding.
+     */
+    public void setEnableExtendedClipboardEncoding(boolean enableExtendedClipboardEncoding) {
+        this.enableExtendedClipboardEncoding = enableExtendedClipboardEncoding;
     }
 }

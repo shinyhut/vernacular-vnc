@@ -14,9 +14,22 @@ public class VernacularConfig {
 
     private Supplier<String> usernameSupplier;
     private Supplier<String> passwordSupplier;
+    private Supplier<Integer> audioChannelCountSupplier = new Supplier<Integer>() {
+        @Override
+        public Integer get() {
+            return 2;
+        }
+    };
+    private Supplier<Integer> audioFrequencySupplier = new Supplier<Integer>() {
+        @Override
+        public Integer get() {
+            return 22050;
+        }
+    };
     private Consumer<VncException> errorListener;
     private Consumer<Image> screenUpdateListener;
     private Consumer<Void> bellListener;
+	private Consumer<byte[]> qemuAudioListener;
     private Consumer<String> remoteClipboardListener;
     private BiConsumer<Image, Point> mousePointerUpdateListener;
     private boolean shared = true;
@@ -27,6 +40,7 @@ public class VernacularConfig {
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
+	private boolean enableQemuAudioEncoding = false;
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
@@ -53,6 +67,22 @@ public class VernacularConfig {
      */
     public void setPasswordSupplier(Supplier<String> passwordSupplier) {
         this.passwordSupplier = passwordSupplier;
+    }
+
+    public Supplier<Integer> getAudioChannelCountSupplier() {
+        return audioChannelCountSupplier;
+    }
+
+    public void setAudioChannelCountSupplier(Supplier<Integer> audioChannelCountSupplier) {
+        this.audioChannelCountSupplier = audioChannelCountSupplier;
+    }
+
+    public Supplier<Integer> getAudioFrequencySupplier() {
+        return audioFrequencySupplier;
+    }
+
+    public void setAudioFrequencySupplier(Supplier<Integer> audioFrequencySupplier) {
+        this.audioFrequencySupplier = audioFrequencySupplier;
     }
 
     public Consumer<VncException> getErrorListener() {
@@ -124,6 +154,14 @@ public class VernacularConfig {
     public void setBellListener(Consumer<Void> bellListener) {
         this.bellListener = bellListener;
     }
+
+    public Consumer<byte[]> getQemuAudioListener() {
+        return qemuAudioListener;
+    }
+
+	public void setQemuAudioListener(Consumer<byte[]> qemuAudioListener) {
+		this.qemuAudioListener = qemuAudioListener;
+	}
 
     public boolean isShared() {
         return shared;
@@ -241,4 +279,12 @@ public class VernacularConfig {
     public void setEnableZLibEncoding(boolean enableZLibEncoding) {
         this.enableZLibEncoding = enableZLibEncoding;
     }
+
+	public boolean isEnableQemuAudioEncoding() {
+		return enableQemuAudioEncoding;
+	}
+
+	public void setEnableQemuAudioEncoding(boolean enableQemuAudioEncoding) {
+		this.enableQemuAudioEncoding = enableQemuAudioEncoding;
+	}
 }

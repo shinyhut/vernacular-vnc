@@ -301,7 +301,7 @@ public class VernacularViewer extends JFrame {
         JPanel connectDialog = new JPanel();
         JTextField hostField = new JTextField(20);
         hostField.addAncestorListener(focusRequester);
-        JTextField portField = new JTextField("5900");
+        JTextField portField = new JTextField("5900", 4);
         JLabel hostLabel = new JLabel("Host");
         hostLabel.setLabelFor(hostField);
         JLabel portLabel = new JLabel("Port");

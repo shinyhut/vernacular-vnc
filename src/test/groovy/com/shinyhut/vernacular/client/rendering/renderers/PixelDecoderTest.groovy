@@ -26,7 +26,7 @@ class PixelDecoderTest extends Specification {
         given:
         def pixelFormat = new PixelFormat(8, 8, true, false, 0, 0, 0, 0, 0, 0)
         def pixel = [1] as byte[]
-        def colorMap = [(1 as BigInteger): new ColorMapEntry(1000, 2000, 3000)]
+        def colorMap = [1L: new ColorMapEntry(1000, 2000, 3000)]
         def decoder = new PixelDecoder(colorMap)
         def input = new ByteArrayInputStream(pixel)
 

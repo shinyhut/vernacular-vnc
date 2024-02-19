@@ -3,11 +3,8 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 import com.shinyhut.vernacular.protocol.messages.ColorMapEntry;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,26 +12,29 @@ public class PixelDecoder {
 
     private static final ColorMapEntry BLACK = new ColorMapEntry(0, 0, 0);
 
-    private final Map<BigInteger, ColorMapEntry> colorMap;
+    private final Map<Long, ColorMapEntry> colorMap;
 
-    public PixelDecoder(Map<BigInteger, ColorMapEntry> colorMap) {
+    public PixelDecoder(Map<Long, ColorMapEntry> colorMap) {
         this.colorMap = colorMap;
     }
 
     public Pixel decode(InputStream in, PixelFormat pixelFormat) throws IOException {
-        DataInput dataInput = new DataInputStream(in);
-        byte[] bytes = new byte[pixelFormat.getBytesPerPixel()];
-        dataInput.readFully(bytes);
-        BigInteger value = new BigInteger(1, bytes);
+        int bytesToRead = pixelFormat.getBytesPerPixel();
+        long value = 0L;
+
+        for (int i = 0; i < bytesToRead; i++) {
+            value <<= 8;
+            value |= in.read();
+        }
 
         int red;
         int green;
         int blue;
 
         if (pixelFormat.isTrueColor()) {
-            red = value.shiftRight(pixelFormat.getRedShift()).intValue() & pixelFormat.getRedMax();
-            green = value.shiftRight(pixelFormat.getGreenShift()).intValue() & pixelFormat.getGreenMax();
-            blue = value.shiftRight(pixelFormat.getBlueShift()).intValue() & pixelFormat.getBlueMax();
+            red = (int) (value >> pixelFormat.getRedShift()) & pixelFormat.getRedMax();
+            green = (int) (value >> pixelFormat.getGreenShift()) & pixelFormat.getGreenMax();
+            blue = (int) (value >> pixelFormat.getBlueShift()) & pixelFormat.getBlueMax();
 
             red = stretch(red, pixelFormat.getRedMax());
             green = stretch(green, pixelFormat.getGreenMax());
@@ -50,7 +50,7 @@ public class PixelDecoder {
     }
 
     private static int stretch(int value, int max) {
-        return (int) (value * ((double) 255 / max));
+        return max == 255 ? value : (int) (value * ((double) 255 / max));
     }
 
     private static int shrink(int colorMapValue) {

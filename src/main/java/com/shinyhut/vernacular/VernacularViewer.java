@@ -46,6 +46,7 @@ public class VernacularViewer extends JFrame {
     private JMenuItem rreMenuItem;
     private JMenuItem hextileMenuItem;
     private JMenuItem zlibMenuItem;
+    private JMenuItem extendedClipboardMenuItem;
 
     private Image lastFrame;
 
@@ -222,6 +223,7 @@ public class VernacularViewer extends JFrame {
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
+        config.setEnableExtendedClipboardEncoding(true);
         client = new VernacularClient(config);
     }
 
@@ -271,11 +273,16 @@ public class VernacularViewer extends JFrame {
         zlibMenuItem = new JCheckBoxMenuItem("ZLIB", false);
         zlibMenuItem.addActionListener(event -> config.setEnableZLibEncoding(zlibMenuItem.isSelected()));
 
+        extendedClipboardMenuItem = new JCheckBoxMenuItem("EXT_CLIPBOARD", false);
+        extendedClipboardMenuItem.setSelected(true);
+        extendedClipboardMenuItem.addActionListener(event -> config.setEnableExtendedClipboardEncoding(extendedClipboardMenuItem.isSelected()));
+
         encodingsMenu = new JMenu("Enabled Encodings");
         encodingsMenu.add(copyrectMenuItem);
         encodingsMenu.add(rreMenuItem);
         encodingsMenu.add(hextileMenuItem);
         encodingsMenu.add(zlibMenuItem);
+        encodingsMenu.add(extendedClipboardMenuItem);
 
         JMenuItem exit = new JMenuItem("Exit");
         exit.setMnemonic(VK_X);

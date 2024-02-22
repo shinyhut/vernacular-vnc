@@ -26,7 +26,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 public class Framebuffer {
 
     private final VncSession session;
-    private final Map<BigInteger, ColorMapEntry> colorMap = new ConcurrentHashMap<>();
+    private final Map<Long, ColorMapEntry> colorMap = new ConcurrentHashMap<>();
     private final Map<Encoding, Renderer> renderers = new ConcurrentHashMap<>();
     private final CursorRenderer cursorRenderer;
 
@@ -78,7 +78,7 @@ public class Framebuffer {
 
     public void updateColorMap(SetColorMapEntries update) {
         for (int i = 0; i < update.getColors().size(); i++) {
-            colorMap.put(BigInteger.valueOf(i + update.getFirstColor()), update.getColors().get(i));
+            colorMap.put((long) i + update.getFirstColor(), update.getColors().get(i));
         }
     }
 

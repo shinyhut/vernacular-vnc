@@ -39,6 +39,7 @@ public class VernacularViewer extends JFrame {
     private JMenuItem bpp8IndexedColorMenuItem;
     private JMenuItem bpp16TrueColorMenuItem;
     private JMenuItem bpp24TrueColorMenuItem;
+    private JMenuItem serverColorPreferenceMenuItem;
     private JMenuItem localCursorMenuItem;
 
     private JMenu encodingsMenu;
@@ -248,13 +249,17 @@ public class VernacularViewer extends JFrame {
         bpp8IndexedColorMenuItem = new JRadioButtonMenuItem("8-bit Indexed Color");
         bpp16TrueColorMenuItem = new JRadioButtonMenuItem("16-bit True Color", true);
         bpp24TrueColorMenuItem = new JRadioButtonMenuItem("24-bit True Color");
+        serverColorPreferenceMenuItem = new JRadioButtonMenuItem("Server color preference");
+
         colorDepths.add(bpp8IndexedColorMenuItem);
         colorDepths.add(bpp16TrueColorMenuItem);
         colorDepths.add(bpp24TrueColorMenuItem);
+        colorDepths.add(serverColorPreferenceMenuItem);
 
         bpp8IndexedColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_8_INDEXED));
         bpp16TrueColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_16_TRUE));
         bpp24TrueColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_24_TRUE));
+        serverColorPreferenceMenuItem.addActionListener(event -> config.setServerPreference(true));
 
         localCursorMenuItem = new JCheckBoxMenuItem("Use Local Cursor", true);
         localCursorMenuItem.addActionListener(event -> config.setUseLocalMousePointer(localCursorMenuItem.isSelected()));

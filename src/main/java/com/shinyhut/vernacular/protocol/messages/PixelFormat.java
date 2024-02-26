@@ -29,6 +29,19 @@ public class PixelFormat implements Encodable {
         this.blueShift = blueShift;
     }
 
+    public PixelFormat(PixelFormat serverPixelFormat) {
+        this.bitsPerPixel = serverPixelFormat.getBitsPerPixel();
+        this.depth = serverPixelFormat.getDepth();
+        this.bigEndian = true;
+        this.trueColor = serverPixelFormat.isTrueColor();
+        this.redMax = serverPixelFormat.getRedMax();
+        this.greenMax = serverPixelFormat.getGreenMax();
+        this.blueMax = serverPixelFormat.getBlueMax();
+        this.redShift = serverPixelFormat.getRedShift();
+        this.greenShift = serverPixelFormat.getGreenShift();
+        this.blueShift = serverPixelFormat.getBlueShift();
+    }
+
     public int getBitsPerPixel() {
         return bitsPerPixel;
     }

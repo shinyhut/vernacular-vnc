@@ -29,17 +29,20 @@ public class Initializer {
         VernacularConfig config = session.getConfig();
         ColorDepth colorDepth = config.getColorDepth();
 
-        PixelFormat pixelFormat = new PixelFormat(
-                colorDepth.getBitsPerPixel(),
-                colorDepth.getDepth(),
-                true,
-                colorDepth.isTrueColor(),
-                colorDepth.getRedMax(),
-                colorDepth.getGreenMax(),
-                colorDepth.getBlueMax(),
-                colorDepth.getRedShift(),
-                colorDepth.getGreenShift(),
-                colorDepth.getBlueShift());
+        PixelFormat serverPixelFormat = serverInit.getPixelFormat();
+        PixelFormat pixelFormat = config.isServerPreference() ? new PixelFormat(serverPixelFormat) :
+                new PixelFormat(
+                        colorDepth.getBitsPerPixel(),
+                        colorDepth.getDepth(),
+                        true,
+                        colorDepth.isTrueColor(),
+                        colorDepth.getRedMax(),
+                        colorDepth.getGreenMax(),
+                        colorDepth.getBlueMax(),
+                        colorDepth.getRedShift(),
+                        colorDepth.getGreenShift(),
+                        colorDepth.getBlueShift());
+
 
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
 

@@ -3,15 +3,26 @@ package com.shinyhut.vernacular.protocol.initialization;
 import com.shinyhut.vernacular.client.VernacularConfig;
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
-import com.shinyhut.vernacular.protocol.messages.*;
+import com.shinyhut.vernacular.protocol.messages.ClientInit;
+import com.shinyhut.vernacular.protocol.messages.Encoding;
+import com.shinyhut.vernacular.protocol.messages.PixelFormat;
+import com.shinyhut.vernacular.protocol.messages.ServerInit;
+import com.shinyhut.vernacular.protocol.messages.SetEncodings;
+import com.shinyhut.vernacular.protocol.messages.SetPixelFormat;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinyhut.vernacular.protocol.messages.Encoding.*;
-import static java.util.Arrays.asList;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.COPYRECT;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.CURSOR;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.DESKTOP_SIZE;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.EXTENDED_CLIPBOARD;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.HEXTILE;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.RAW;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.RRE;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.ZLIB;
 
 public class Initializer {
 
@@ -59,6 +70,10 @@ public class Initializer {
 
         if (config.isEnableCopyrectEncoding()) {
             encodings.add(COPYRECT);
+        }
+
+        if (config.isEnableExtendedClipboard()) {
+            encodings.add(EXTENDED_CLIPBOARD);
         }
 
         encodings.add(RAW);

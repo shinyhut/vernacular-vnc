@@ -12,7 +12,8 @@ public enum Encoding {
     HEXTILE(5),
     ZLIB(6),
     DESKTOP_SIZE(-223),
-    CURSOR(-239)
+    CURSOR(-239),
+    EXTENDED_CLIPBOARD(0xC0A1E5CE)
     ;
 
     private int code;

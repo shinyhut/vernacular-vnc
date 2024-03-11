@@ -2,8 +2,11 @@ package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
+import com.shinyhut.vernacular.protocol.messages.MessageHeaderFlags;
 
 import java.awt.*;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -24,9 +27,12 @@ public class VernacularConfig {
     private ColorDepth colorDepth = BPP_8_INDEXED;
     private boolean useLocalMousePointer = false;
     private boolean enableCopyrectEncoding = true;
+    private boolean enableExtendedClipboard = true;
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
+
+    private Map<MessageHeaderFlags, Integer> maxSizePerFormat = new EnumMap<>(MessageHeaderFlags.class);
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
@@ -197,6 +203,10 @@ public class VernacularConfig {
         return enableCopyrectEncoding;
     }
 
+    public boolean isEnableExtendedClipboard() {
+        return enableExtendedClipboard;
+    }
+
     /**
      * Enable or disable the COPYRECT video encoding
      * @param enableCopyrectEncoding enable or disable the COPYRECT video encoding
@@ -240,5 +250,9 @@ public class VernacularConfig {
      */
     public void setEnableZLibEncoding(boolean enableZLibEncoding) {
         this.enableZLibEncoding = enableZLibEncoding;
+    }
+
+    public Map<MessageHeaderFlags, Integer> getMaxSizePerFormat() {
+        return maxSizePerFormat;
     }
 }

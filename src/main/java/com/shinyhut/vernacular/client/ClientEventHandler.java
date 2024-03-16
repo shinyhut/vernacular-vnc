@@ -2,7 +2,13 @@ package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.protocol.messages.*;
+import com.shinyhut.vernacular.protocol.messages.ClientCutText;
+import com.shinyhut.vernacular.protocol.messages.ClientCutTextCaps;
+import com.shinyhut.vernacular.protocol.messages.ClientCutTextExtendedClipboard;
+import com.shinyhut.vernacular.protocol.messages.Encodable;
+import com.shinyhut.vernacular.protocol.messages.FramebufferUpdateRequest;
+import com.shinyhut.vernacular.protocol.messages.KeyEvent;
+import com.shinyhut.vernacular.protocol.messages.PointerEvent;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -92,9 +98,21 @@ public class ClientEventHandler {
         sendMessage(message);
     }
 
+    void sendClientCutTextCaps() throws IOException {
+        ClientCutTextCaps clientCutTextCaps = new ClientCutTextCaps(session.getConfig().getMaxSizePerFormat());
+        sendMessage(clientCutTextCaps);
+    }
+
     void copyText(String text) throws IOException {
-        ClientCutText message = new ClientCutText(text);
-        sendMessage(message);
+        if (session.getConfig().isEnableExtendedClipboard()) {
+            sendClientCutTextCaps();
+
+            ClientCutTextExtendedClipboard clientCutTextExtendedClipboard = new ClientCutTextExtendedClipboard(text);
+            sendMessage(clientCutTextExtendedClipboard);
+        } else {
+            ClientCutText message = new ClientCutText(text);
+            sendMessage(message);
+        }
     }
 
     private void updateMouseStatus() throws IOException {

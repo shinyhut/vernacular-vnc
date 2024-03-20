@@ -208,6 +208,14 @@ public class VernacularConfig {
     }
 
     /**
+     * Enable or disable the Extended clipboard encoding support
+     * @param enableExtendedClipboard enable or disable the Extended clipboard encoding support
+     */
+    public void setEnableExtendedClipboard(boolean enableExtendedClipboard) {
+        this.enableExtendedClipboard = enableExtendedClipboard;
+    }
+
+    /**
      * Enable or disable the COPYRECT video encoding
      * @param enableCopyrectEncoding enable or disable the COPYRECT video encoding
      */
